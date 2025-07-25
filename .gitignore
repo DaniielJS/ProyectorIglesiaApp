@@ -1,0 +1,46 @@
+@"
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración de IDEs
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+**/build/
+gradle.properties
+local.properties
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Archivos de log
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+*.swp
+
+# Archivos de Android Studio
+.cxx/
+*.apk
+*.ap_ 
+*.dex
+*.class
+*.jar
+*.war
+*.ear
+
+# Archivos de ejecución
+*.db
+*.sqlite
+*.lock
+
+# Otros
+captures/
+output.json
+"@ | Set-Content .gitignore
