@@ -1,10 +1,14 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:1:1-20:12
-INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:1:1-20:12
-INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:1:1-20:12
-INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:1:1-20:12
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:1:1-21:12
+INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:1:1-21:12
+INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:1:1-21:12
+INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:1:1-21:12
+MERGED from [io.coil-kt:coil-compose:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\7333348cef0a32161a5693afda4520dd\transformed\coil-compose-2.5.0\AndroidManifest.xml:2:1-7:12
+MERGED from [io.coil-kt:coil-compose-base:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b2b4bd9d86eb6bb722c577d5a69e7078\transformed\coil-compose-base-2.5.0\AndroidManifest.xml:2:1-7:12
+MERGED from [io.coil-kt:coil:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\6a7e16ff33947633d5554b82dd6120c0\transformed\coil-2.5.0\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material3:material3-android:1.3.2] C:\Users\Asus\.gradle\caches\8.9\transforms\5a21221f19d98bb78638aa6429511733\transformed\material3-release\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.compose.material:material-icons-extended-android:1.6.0] C:\Users\Asus\.gradle\caches\8.9\transforms\685926f0fe69ddc9656bba4a58242229\transformed\material-icons-extended-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material:material-icons-core-android:1.6.0] C:\Users\Asus\.gradle\caches\8.9\transforms\0e8ca31344dd51d6c148366c7668de9d\transformed\material-icons-core-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material:material-ripple-android:1.7.0] C:\Users\Asus\.gradle\caches\8.9\transforms\0d38a18cab6535c65cfa8de2107cc501\transformed\material-ripple-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.foundation:foundation-android:1.7.0] C:\Users\Asus\.gradle\caches\8.9\transforms\1b4645a579d6654d42d4bb6d5e221e9b\transformed\foundation-release\AndroidManifest.xml:2:1-7:12
@@ -17,6 +21,7 @@ MERGED from [androidx.compose.ui:ui-text-android:1.8.3] C:\Users\Asus\.gradle\ca
 MERGED from [androidx.compose.ui:ui-graphics-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\0d836f6f7c2f9eb700cbdda7307f43cc\transformed\ui-graphics-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.ui:ui-geometry-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\dfa35ed46f9050d9d2df747324534fda\transformed\ui-geometry-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\dccc7f1ceca760fceee6138692da31b3\transformed\ui-tooling-preview-release\AndroidManifest.xml:17:1-22:12
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] C:\Users\Asus\.gradle\caches\8.9\transforms\9b803a63845216d2f92b2d68a2af70e9\transformed\accompanist-drawablepainter-0.32.0\AndroidManifest.xml:17:1-23:12
 MERGED from [androidx.compose.ui:ui-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\df40af4cff586ecc335f9453e0aea6e6\transformed\ui-release\AndroidManifest.xml:2:1-7:12
 MERGED from [com.github.bumptech.glide:glide:4.16.0] C:\Users\Asus\.gradle\caches\8.9\transforms\890a717a77ee87b9e39ef0095fafde56\transformed\glide-4.16.0\AndroidManifest.xml:2:1-9:12
 MERGED from [androidx.fragment:fragment:1.3.6] C:\Users\Asus\.gradle\caches\8.9\transforms\8c5f820c27aa323e61bb183e39f751a5\transformed\fragment-1.3.6\AndroidManifest.xml:17:1-24:12
@@ -36,6 +41,8 @@ MERGED from [androidx.documentfile:documentfile:1.1.0] C:\Users\Asus\.gradle\cac
 MERGED from [androidx.autofill:autofill:1.0.0] C:\Users\Asus\.gradle\caches\8.9\transforms\50b129e3d40bfd6e56f60adb57f0f170\transformed\autofill-1.0.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\Asus\.gradle\caches\8.9\transforms\61a4861a6b7113472683e0e4be7d8892\transformed\viewpager-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.loader:loader:1.0.0] C:\Users\Asus\.gradle\caches\8.9\transforms\5b74d34181490baf38552bdce167fe88\transformed\loader-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [io.coil-kt:coil-base:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\eaf47ddb58ae3c7b2b7105ad02089c8a\transformed\coil-base-2.5.0\AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\Asus\.gradle\caches\8.9\transforms\8b43668aca17eb8eda7fdb0e8e52d2c6\transformed\appcompat-resources-1.6.1\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\Asus\.gradle\caches\8.9\transforms\22cd8e9cf276254d6c0598f79b9261f0\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\Asus\.gradle\caches\8.9\transforms\5d5ed11799d09859b9c7146421532609\transformed\vectordrawable-1.1.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.recyclerview:recyclerview:1.3.0] C:\Users\Asus\.gradle\caches\8.9\transforms\3b5b706f7fd84717cc80dba44b51c7d0\transformed\recyclerview-1.3.0\AndroidManifest.xml:17:1-22:12
@@ -71,21 +78,25 @@ MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\Asus\.gradle\cac
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\Asus\.gradle\caches\8.9\transforms\e8abeddab26eda3cc1315783ab50cafc\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:17:1-27:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b0826cc757958f3b8f55e4db319618e3\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
 	package
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:2:5-39
-		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:2:5-39
+		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
 	android:versionName
-		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
 	android:versionCode
-		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:1:11-69
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:1:11-69
 uses-permission#android.permission.READ_EXTERNAL_STORAGE
-ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:4:5-80
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:4:5-80
 	android:name
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:4:22-77
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:4:22-77
+uses-permission#android.permission.INTERNET
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:5:5-67
+	android:name
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:5:22-64
 application
-ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:6:5-18:19
-INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:6:5-18:19
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:6:5-19:19
+INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:6:5-19:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b133d4537feaa99c3730441e5ee04794\transformed\emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.emoji2:emoji2:1.4.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b133d4537feaa99c3730441e5ee04794\transformed\emoji2-1.4.0\AndroidManifest.xml:23:5-33:19
 MERGED from [androidx.core:core:1.16.0] C:\Users\Asus\.gradle\caches\8.9\transforms\745a3c2fae72b88c6f123b2b5a0c806e\transformed\core-1.16.0\AndroidManifest.xml:28:5-89
@@ -99,39 +110,49 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\Asus\.gradle\cache
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\Asus\.gradle\caches\8.9\transforms\e8abeddab26eda3cc1315783ab50cafc\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\Asus\.gradle\caches\8.9\transforms\e8abeddab26eda3cc1315783ab50cafc\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
 	android:extractNativeLibs
-		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.16.0] C:\Users\Asus\.gradle\caches\8.9\transforms\745a3c2fae72b88c6f123b2b5a0c806e\transformed\core-1.16.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:9:9-35
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:9:9-35
 	android:label
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:8:9-42
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:8:9-42
 	android:allowBackup
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:7:9-35
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:7:9-35
 	android:theme
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:10:9-68
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:11:9-68
+	android:usesCleartextTraffic
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:10:9-44
 activity#com.proyectorbiblico.app.MainActivity
-ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:11:9-17:20
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:12:9-18:20
 	android:exported
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:12:13-36
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:13:13-36
 	android:name
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:11:19-47
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:12:19-47
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:13:13-16:29
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:14:13-17:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:14:17-69
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:15:17-69
 	android:name
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:14:25-66
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:15:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:15:17-77
+ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:16:17-77
 	android:name
-		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml:15:27-74
+		ADDED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml:16:27-74
 uses-sdk
-INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
-INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
+MERGED from [io.coil-kt:coil-compose:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\7333348cef0a32161a5693afda4520dd\transformed\coil-compose-2.5.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-compose:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\7333348cef0a32161a5693afda4520dd\transformed\coil-compose-2.5.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-compose-base:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b2b4bd9d86eb6bb722c577d5a69e7078\transformed\coil-compose-base-2.5.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-compose-base:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b2b4bd9d86eb6bb722c577d5a69e7078\transformed\coil-compose-base-2.5.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\6a7e16ff33947633d5554b82dd6120c0\transformed\coil-2.5.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\6a7e16ff33947633d5554b82dd6120c0\transformed\coil-2.5.0\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material3:material3-android:1.3.2] C:\Users\Asus\.gradle\caches\8.9\transforms\5a21221f19d98bb78638aa6429511733\transformed\material3-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.material3:material3-android:1.3.2] C:\Users\Asus\.gradle\caches\8.9\transforms\5a21221f19d98bb78638aa6429511733\transformed\material3-release\AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.6.0] C:\Users\Asus\.gradle\caches\8.9\transforms\685926f0fe69ddc9656bba4a58242229\transformed\material-icons-extended-release\AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.material:material-icons-extended-android:1.6.0] C:\Users\Asus\.gradle\caches\8.9\transforms\685926f0fe69ddc9656bba4a58242229\transformed\material-icons-extended-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-icons-core-android:1.6.0] C:\Users\Asus\.gradle\caches\8.9\transforms\0e8ca31344dd51d6c148366c7668de9d\transformed\material-icons-core-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-icons-core-android:1.6.0] C:\Users\Asus\.gradle\caches\8.9\transforms\0e8ca31344dd51d6c148366c7668de9d\transformed\material-icons-core-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.material:material-ripple-android:1.7.0] C:\Users\Asus\.gradle\caches\8.9\transforms\0d38a18cab6535c65cfa8de2107cc501\transformed\material-ripple-release\AndroidManifest.xml:5:5-44
@@ -156,6 +177,8 @@ MERGED from [androidx.compose.ui:ui-geometry-android:1.8.3] C:\Users\Asus\.gradl
 MERGED from [androidx.compose.ui:ui-geometry-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\dfa35ed46f9050d9d2df747324534fda\transformed\ui-geometry-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\dccc7f1ceca760fceee6138692da31b3\transformed\ui-tooling-preview-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.ui:ui-tooling-preview-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\dccc7f1ceca760fceee6138692da31b3\transformed\ui-tooling-preview-release\AndroidManifest.xml:20:5-44
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] C:\Users\Asus\.gradle\caches\8.9\transforms\9b803a63845216d2f92b2d68a2af70e9\transformed\accompanist-drawablepainter-0.32.0\AndroidManifest.xml:21:5-44
+MERGED from [com.google.accompanist:accompanist-drawablepainter:0.32.0] C:\Users\Asus\.gradle\caches\8.9\transforms\9b803a63845216d2f92b2d68a2af70e9\transformed\accompanist-drawablepainter-0.32.0\AndroidManifest.xml:21:5-44
 MERGED from [androidx.compose.ui:ui-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\df40af4cff586ecc335f9453e0aea6e6\transformed\ui-release\AndroidManifest.xml:5:5-44
 MERGED from [androidx.compose.ui:ui-android:1.8.3] C:\Users\Asus\.gradle\caches\8.9\transforms\df40af4cff586ecc335f9453e0aea6e6\transformed\ui-release\AndroidManifest.xml:5:5-44
 MERGED from [com.github.bumptech.glide:glide:4.16.0] C:\Users\Asus\.gradle\caches\8.9\transforms\890a717a77ee87b9e39ef0095fafde56\transformed\glide-4.16.0\AndroidManifest.xml:5:5-7:41
@@ -194,6 +217,10 @@ MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\Asus\.gradle\caches\8.
 MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\Asus\.gradle\caches\8.9\transforms\61a4861a6b7113472683e0e4be7d8892\transformed\viewpager-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.loader:loader:1.0.0] C:\Users\Asus\.gradle\caches\8.9\transforms\5b74d34181490baf38552bdce167fe88\transformed\loader-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.loader:loader:1.0.0] C:\Users\Asus\.gradle\caches\8.9\transforms\5b74d34181490baf38552bdce167fe88\transformed\loader-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [io.coil-kt:coil-base:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\eaf47ddb58ae3c7b2b7105ad02089c8a\transformed\coil-base-2.5.0\AndroidManifest.xml:5:5-44
+MERGED from [io.coil-kt:coil-base:2.5.0] C:\Users\Asus\.gradle\caches\8.9\transforms\eaf47ddb58ae3c7b2b7105ad02089c8a\transformed\coil-base-2.5.0\AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\Asus\.gradle\caches\8.9\transforms\8b43668aca17eb8eda7fdb0e8e52d2c6\transformed\appcompat-resources-1.6.1\AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.6.1] C:\Users\Asus\.gradle\caches\8.9\transforms\8b43668aca17eb8eda7fdb0e8e52d2c6\transformed\appcompat-resources-1.6.1\AndroidManifest.xml:20:5-44
 MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\Asus\.gradle\caches\8.9\transforms\22cd8e9cf276254d6c0598f79b9261f0\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\Asus\.gradle\caches\8.9\transforms\22cd8e9cf276254d6c0598f79b9261f0\transformed\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\Asus\.gradle\caches\8.9\transforms\5d5ed11799d09859b9c7146421532609\transformed\vectordrawable-1.1.0\AndroidManifest.xml:20:5-22:41
@@ -263,9 +290,9 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\As
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b0826cc757958f3b8f55e4db319618e3\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\Asus\.gradle\caches\8.9\transforms\b0826cc757958f3b8f55e4db319618e3\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 	android:targetSdkVersion
-		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\Asus\Documents\Proyecto Proyector\ProyectorIglesiaApp\app\src\main\AndroidManifest.xml
 uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from [androidx.media3:media3-exoplayer:1.7.1] C:\Users\Asus\.gradle\caches\8.9\transforms\f1267e3b66008e410443e8af97b1abc5\transformed\media3-exoplayer-1.7.1\AndroidManifest.xml:22:5-79
 MERGED from [androidx.media3:media3-common:1.7.1] C:\Users\Asus\.gradle\caches\8.9\transforms\c16831e4687a01ab2db05f403fd550c6\transformed\media3-common-1.7.1\AndroidManifest.xml:22:5-79

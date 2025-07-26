@@ -2,11 +2,12 @@
     package="com.proyectorbiblico.app">
     <!-- AndroidManifest.xml -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
         android:label="Proyector Bíblico"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
         <activity android:name=".MainActivity"
             android:exported="true">
