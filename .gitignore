@@ -1,46 +1,44 @@
-@"
-# Archivos de sistema
-.DS_Store
-Thumbs.db
-
-# Archivos de configuración de IDEs
+# Android Studio
 .idea/
 *.iml
+.cxx/
 
 # Gradle
 .gradle/
-build/
 **/build/
-gradle.properties
+build/
 local.properties
-.gradle/
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
+gradle.properties
+*.lock
 
-# Archivos de log
-*.log
-
-# Archivos temporales
-*.tmp
-*.temp
-*.swp
-
-# Archivos de Android Studio
-.cxx/
+# Outputs
 *.apk
-*.ap_ 
+*.ap_
 *.dex
 *.class
 *.jar
 *.war
 *.ear
 
-# Archivos de ejecución
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+
+# Database
 *.db
 *.sqlite
-*.lock
 
-# Otros
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Output from testing or tools
 captures/
 output.json
-"@ | Set-Content .gitignore
+
+# Jetpack Compose previews cache (opcional)
+.idea/previews/
