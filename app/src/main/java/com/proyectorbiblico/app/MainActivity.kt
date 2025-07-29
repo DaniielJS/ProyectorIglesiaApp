@@ -168,9 +168,7 @@ class MainActivity : ComponentActivity() {
         this.onArchivosLeidos = onArchivosLeidos
         folderPickerLauncher.launch(null)
     }
-    fun Modifier.heightBetween(min: Dp, max: Dp): Modifier {
-        return this.then(Modifier.heightIn(min = min, max = max))
-    }
+
 
     private fun listarArchivosEnCarpeta(uri: Uri): List<ArchivoMultimedia> {
         val folder = DocumentFile.fromTreeUri(this, uri)
