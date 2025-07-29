@@ -177,7 +177,10 @@ class MainActivity : ComponentActivity() {
         return folder?.listFiles()?.mapNotNull {
             if (!it.isFile) return@mapNotNull null
             val tipo = when {
-                it.name?.endsWith(".jpg", true) == true || it.name?.endsWith(".png", true) == true -> TipoArchivo.IMAGEN
+                it.name?.endsWith(".jpg", true) == true
+                        || it.name?.endsWith(".png", true) == true
+                        || it.name?.endsWith(".jpeg", true) == true
+                        || it.name?.endsWith(".gif", true) == true -> TipoArchivo.IMAGEN
                 it.name?.endsWith(".mp4", true) == true -> TipoArchivo.VIDEO
                 it.name?.endsWith(".mp3", true) == true -> TipoArchivo.AUDIO
                 else -> TipoArchivo.OTRO
