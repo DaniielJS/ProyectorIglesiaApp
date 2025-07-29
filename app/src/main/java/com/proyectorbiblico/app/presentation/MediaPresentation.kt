@@ -46,10 +46,24 @@ class MediaPresentation(
     }
 
     private fun mostrarVersiculo(texto: String) {
-        textoView.apply {
-            text = texto
-            visibility = View.VISIBLE
-        }
+        val fondo = findViewById<ImageView>(R.id.fondoVersiculo)
+        val titulo = findViewById<TextView>(R.id.tituloVersiculoTextView)
+        val cuerpo = findViewById<TextView>(R.id.versiculoTextView)
+        val contenedor = findViewById<View>(R.id.contenedorTexto)
+
+        fondo.visibility = View.VISIBLE
+        contenedor.visibility = View.VISIBLE
+
+        // Separar título de contenido
+        val lineas = texto.lines()
+        val tituloTexto = lineas.firstOrNull() ?: ""
+        val cuerpoTexto = lineas.drop(1).joinToString("\n")
+
+        titulo.text = tituloTexto
+        titulo.visibility = View.VISIBLE
+
+        cuerpo.text = cuerpoTexto
+        cuerpo.visibility = View.VISIBLE
     }
 
     private fun mostrarImagen(uri: Uri) {
@@ -63,6 +77,7 @@ class MediaPresentation(
         exoVideoPlayer?.release()
         exoVideoPlayer = ExoPlayer.Builder(context).build().also { player ->
             playerView.player = player
+            playerView.useController = false  // 👈 Este es el cambio clave
             playerView.visibility = View.VISIBLE
             player.setMediaItem(MediaItem.fromUri(uri))
             player.repeatMode = ExoPlayer.REPEAT_MODE_ONE

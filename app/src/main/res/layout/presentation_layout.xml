@@ -1,17 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/presentation_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/versiculoTextView"
+    <ImageView
+        android:id="@+id/fondoVersiculo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:textSize="32sp"
-        android:gravity="center"
-        android:textColor="#FFFFFF"
-        android:background="#000000"
+        android:scaleType="centerCrop"
+        android:src="@drawable/fondo_versiculo"
+        android:visibility="gone" />
+
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="gone" />
 
     <ImageView
@@ -20,11 +23,36 @@
         android:layout_height="match_parent"
         android:scaleType="fitCenter"
         android:visibility="gone" />
-
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/playerView"
+    <!-- Contenedor para centrar el contenido vertical y horizontal -->
+    <LinearLayout
+        android:id="@+id/contenedorTexto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        app:use_controller="false" />
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone">
+    <!-- Título (libro + capítulo) -->
+    <TextView
+        android:id="@+id/tituloVersiculoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:textSize="64sp"
+        android:textStyle="bold|italic"
+        android:gravity="center"
+        android:paddingBottom="16dp"
+        android:visibility="gone" />
+
+    <!-- Texto de los versículos -->
+    <TextView
+        android:id="@+id/versiculoTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
+        android:textSize="48sp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:visibility="gone" />
+    </LinearLayout>
 </FrameLayout>

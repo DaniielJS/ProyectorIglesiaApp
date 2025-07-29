@@ -15,6 +15,8 @@ object MediaController {
     private var videoPresentation: MediaPresentation? = null
     private var audioPresentation: MediaPresentation? = null
     private var imagenPresentation: MediaPresentation? = null
+
+    var previewPlayer: ExoPlayer? = null
     var ultimoProyectado by mutableStateOf<ArchivoMultimedia?>(null)
         private set
     fun getVideoPlaybackInfo(): Pair<Long, Boolean>? {
@@ -104,7 +106,9 @@ object MediaController {
 
     fun togglePlayPause(tipo: TipoArchivo, play: Boolean) {
         when (tipo) {
-            TipoArchivo.VIDEO -> videoPresentation?.setPlayWhenReady(play)
+            TipoArchivo.VIDEO -> {
+                videoPresentation?.setPlayWhenReady(play)
+                previewPlayer?.playWhenReady = play }
             TipoArchivo.AUDIO -> audioPresentation?.setPlayWhenReady(play)
             else -> {}
         }

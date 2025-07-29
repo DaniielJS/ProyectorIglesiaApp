@@ -67,6 +67,7 @@ fun VistaProyeccionActual(
                         val previewPlayer = remember(uri, initialPosition) {
                             ExoPlayer.Builder(context).build().apply {
                                 setMediaItem(MediaItem.fromUri(uri))
+                                volume = 0f // 🔇 silencia la vista previa
                                 prepare()
                                 seekTo(initialPosition)
                                 playWhenReady = true // ✅ iniciar automáticamente

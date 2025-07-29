@@ -1,6 +1,19 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    kotlin("plugin.serialization") version "1.9.10"
+}
+
+// 👇 Este bloque debe ir fuera de `dependencies {}` y de `android {}` (justo antes o después)
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlinx" && requested.name == "kotlinx-serialization-json") {
+            useVersion("1.6.3")
+        }
+        if (requested.group == "org.jetbrains.kotlinx" && requested.name == "kotlinx-serialization-core") {
+            useVersion("1.6.3")
+        }
+    }
 }
 
 android {
@@ -31,7 +44,6 @@ android {
         kotlinCompilerExtensionVersion = "1.5.3"
     }
 }
-
 dependencies {
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.2")
@@ -47,6 +59,7 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.3.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("io.coil-kt:coil-compose:2.5.0") // usa la versión más reciente si deseas
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }

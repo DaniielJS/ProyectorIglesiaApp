@@ -2,29 +2,63 @@ package com.proyectorbiblico.app.components
 
 import android.app.Activity
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.proyectorbiblico.app.MediaController
 import com.proyectorbiblico.app.model.ArchivoMultimedia
+import com.proyectorbiblico.app.model.ResultadoBusquedaLibre
 import com.proyectorbiblico.app.model.TipoArchivo
+import com.proyectorbiblico.app.model.VersiculoBusquedaLibre
 import com.proyectorbiblico.app.presentation.getExternalDisplay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import java.net.URL
-
-data class LibroBiblia(val nombres: List<String>, val abrev: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuscadorVersiculo() {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+
+    val libroFocus = remember { FocusRequester() }
+    val capituloFocus = remember { FocusRequester() }
+    val versiculoInicioFocus = remember { FocusRequester() }
+    val versiculoFinFocus = remember { FocusRequester() }
+
+    var libroInput by remember { mutableStateOf("") }
+    var libroSeleccionado by remember { mutableStateOf<LibroBiblia?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+
+    var capitulo by remember { mutableStateOf("") }
+    var versiculoInicio by remember { mutableStateOf("") }
+    var versiculoFin by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(false) }
+
+    var busquedaLibre by remember { mutableStateOf("") }
+    var resultado by remember { mutableStateOf<List<VersiculoBusquedaLibre>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        libroFocus.requestFocus()
+    }
+
     val librosDisponibles = remember {
         listOf(
             LibroBiblia(listOf("Genesis"), "GN"),
@@ -95,55 +129,56 @@ fun BuscadorVersiculo() {
             LibroBiblia(listOf("Apocalipsis", "Revelation"), "AP")
         )
     }
-
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    var libroInput by remember { mutableStateOf("") }
-    var libroSeleccionado by remember { mutableStateOf<LibroBiblia?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-
-    var capitulo by remember { mutableStateOf("") }
-    var versiculoInicio by remember { mutableStateOf("") }
-    var versiculoFin by remember { mutableStateOf("") }
-    var resultado by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-
-    var busquedaLibre by remember { mutableStateOf("") }
-
     val librosFiltrados = librosDisponibles.filter {
         it.nombres.any { n -> n.contains(libroInput, ignoreCase = true) }
     }
 
-    suspend fun fetchBusquedaLibre(): String {
-        return withContext(Dispatchers.IO) {
-            try {
-                val query = busquedaLibre.trim().replace(" ", "%20")
-                val url = "https://bible-api.deno.dev/api/read/nvi/search?q=$query"
-                URL(url).readText()
-            } catch (e: Exception) {
-                "Error en búsqueda libre"
-            }
-        }
-    }
-
-    suspend fun fetchVersiculoText(): String {
+    suspend fun fetchVersiculoText(): List<VersiculoBusquedaLibre> {
         return withContext(Dispatchers.IO) {
             try {
                 val versiculoFinal = versiculoFin.takeIf { it.isNotBlank() }?.let { "-$it" } ?: ""
                 val url = "https://bible-api.deno.dev/api/read/rv1960/${libroSeleccionado?.nombres?.first()}/${capitulo}/${versiculoInicio}$versiculoFinal"
-                URL(url).readText()
+                val json = URL(url).readText()
+                Log.d("BUSQUEDA", "JSON recibido: $json")
+                val parsed = if (json.trim().startsWith("[")) {
+                    Json.decodeFromString<List<VersiculoBusquedaLibre>>(json)
+                } else {
+                    listOf(Json.decodeFromString<VersiculoBusquedaLibre>(json))
+                }
+                parsed.map {
+                    it.copy(book = libroSeleccionado?.nombres?.first() ?: "", chapter = capitulo.toIntOrNull() ?: 0)
+                }
             } catch (e: Exception) {
-                "Error"
+                Log.e("BUSQUEDA", "Error al parsear versículo", e)
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun fetchBusquedaLibre(): List<VersiculoBusquedaLibre> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val query = busquedaLibre.trim().replace(" ", "%20")
+                val url = "https://bible-api.deno.dev/api/read/nvi/search?q=$query"
+                val json = URL(url).readText()
+                Log.d("BUSQUEDA", "JSON recibido: $json")
+
+                val jsonParser = Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                }
+
+                val parsed = jsonParser.decodeFromString<ResultadoBusquedaLibre>(json)
+                parsed.data
+            } catch (e: Exception) {
+                Log.e("BUSQUEDA", "Error en búsqueda libre", e)
+                emptyList()
             }
         }
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
-        // Fila para libro y capítulo
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-
             Box(modifier = Modifier.weight(1f)) {
                 ExposedDropdownMenuBox(
                     expanded = expanded,
@@ -156,7 +191,10 @@ fun BuscadorVersiculo() {
                             expanded = true
                         },
                         label = { Text("Libro") },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                            .focusRequester(libroFocus)
                     )
 
                     ExposedDropdownMenu(
@@ -170,6 +208,10 @@ fun BuscadorVersiculo() {
                                     libroSeleccionado = libro
                                     libroInput = libro.nombres.first()
                                     expanded = false
+                                    focusManager.moveFocus(FocusDirection.Next)
+                                    coroutineScope.launch {
+                                        capituloFocus.requestFocus()
+                                    }
                                 }
                             )
                         }
@@ -179,66 +221,62 @@ fun BuscadorVersiculo() {
 
             OutlinedTextField(
                 value = capitulo,
-                onValueChange = { capitulo = it.filter { c -> c.isDigit() } },
+                onValueChange = {
+                    capitulo = it.filter { c -> c.isDigit() }
+                    if (it.isNotEmpty()) versiculoInicioFocus.requestFocus()
+                },
                 label = { Text("Cap") },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                modifier = Modifier.width(80.dp)
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .width(80.dp)
+                    .focusRequester(capituloFocus)
             )
         }
 
-        // Fila para versículos
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
                 value = versiculoInicio,
-                onValueChange = { versiculoInicio = it.filter { c -> c.isDigit() } },
+                onValueChange = {
+                    versiculoInicio = it.filter { c -> c.isDigit() }
+                    if (it.isNotEmpty()) versiculoFinFocus.requestFocus()
+                },
                 label = { Text("Vers. Inicio") },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                modifier = Modifier.weight(1f)
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .weight(1f)
+                    .focusRequester(versiculoInicioFocus)
             )
 
             OutlinedTextField(
                 value = versiculoFin,
-                onValueChange = { versiculoFin = it.filter { c -> c.isDigit() } },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number
-                ),
-                label = { Text("Vers. Final (opcional)") },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Button(
-            onClick = {
-                if (libroSeleccionado != null && capitulo.isNotBlank() && versiculoInicio.isNotBlank()) {
-                    loading = true
-                    coroutineScope.launch {
-                        resultado = fetchVersiculoText().trim()
-                        loading = false
-                    }
-                } else {
-                    Toast.makeText(context, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (loading) "Buscando..." else "🔍 Buscar Versículo")
-        }
-
-        if (resultado.isNotBlank()) {
-            Text(
-                text = resultado,
-                style = MaterialTheme.typography.bodyMedium,
+                onValueChange = {
+                    versiculoFin = it.filter { c -> c.isDigit() }
+                },
+                label = { Text("Vers. Final") },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .weight(1f)
+                    .focusRequester(versiculoFinFocus)
             )
         }
 
+        Button(onClick = {
+            if (libroSeleccionado != null && capitulo.isNotBlank() && versiculoInicio.isNotBlank()) {
+                loading = true
+                coroutineScope.launch {
+                    resultado = fetchVersiculoText()
+                    loading = false
+                }
+            } else {
+                Toast.makeText(context, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show()
+            }
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text("🔍 Buscar Versículo")
+        }
+
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
         Text("Búsqueda libre", style = MaterialTheme.typography.labelLarge)
+
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
                 value = busquedaLibre,
@@ -247,57 +285,57 @@ fun BuscadorVersiculo() {
                 modifier = Modifier.weight(1f)
             )
 
-            Button(
-                onClick = {
-                    if (busquedaLibre.isNotBlank()) {
-                        loading = true
-                        coroutineScope.launch {
-                            resultado = fetchBusquedaLibre().trim()
-                            loading = false
-                        }
+            Button(onClick = {
+                if (busquedaLibre.isNotBlank()) {
+                    loading = true
+                    coroutineScope.launch {
+                        resultado = fetchBusquedaLibre()
+                        loading = false
                     }
-                },
-                modifier = Modifier.alignByBaseline()
-            ) {
+                }
+            }) {
                 Text(if (loading) "Buscando..." else "🔍 Buscar")
             }
         }
-        // Búsqueda libre
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-        Button(
-            onClick = {
-                if (libroSeleccionado != null && capitulo.isNotBlank() && versiculoInicio.isNotBlank()) {
-                    loading = true
-                    val activity = context as Activity
-                    val display = activity.getExternalDisplay()
-
-                    if (display == null) {
-                        Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
-                        loading = false
-                        return@Button
+        if (resultado.isNotEmpty()) {
+            val agrupado = resultado.groupBy { it.book to it.chapter }
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
+                agrupado.forEach { (clave, lista) ->
+                    val textoCompleto = buildString {
+                        append("${clave.first} - Cap. ${clave.second}\n")
+                        append(lista.joinToString("\n") { "${it.number}. ${it.verse}" })
                     }
-
-                    coroutineScope.launch {
-                        val texto = fetchVersiculoText()
-                        val archivo = ArchivoMultimedia(
-                            nombre = "Versículo: ${libroSeleccionado?.nombres?.first()} $capitulo:$versiculoInicio" +
-                                    (if (versiculoFin.isNotBlank()) "-$versiculoFin" else ""),
-                            uri = Uri.EMPTY,
-                            tipo = TipoArchivo.TEXTO,
-                            texto = texto.trim()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val display = (context as Activity).getExternalDisplay()
+                                if (display != null) {
+                                    val archivo = ArchivoMultimedia(
+                                        nombre = "${clave.first} ${clave.second}",
+                                        uri = Uri.EMPTY,
+                                        tipo = TipoArchivo.TEXTO,
+                                        texto = textoCompleto
+                                    )
+                                    MediaController.proyectar(context, display, archivo)
+                                } else {
+                                    Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                    ) {
+                        Text(
+                            text = "${clave.first} ${clave.second}",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
                         )
-                        MediaController.proyectar(activity, display, archivo)
-                        resultado = texto.trim()
-                        loading = false
+                        lista.forEachIndexed { i, versiculo ->
+                            Text(text = "${i + 1}. ${versiculo.verse}")
+                        }
                     }
-                } else {
-                    Toast.makeText(context, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show()
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("📺 Proyectar Versículo")
+            }
         }
     }
 }
+
+data class LibroBiblia(val nombres: List<String>, val abrev: String)
