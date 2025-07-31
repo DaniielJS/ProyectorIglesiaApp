@@ -1,8 +1,16 @@
 package com.proyectorbiblico.app.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 
@@ -25,10 +33,15 @@ fun ModalTexto(
                 )
             },
             text = {
-                Text(
-                    text = contenido,
-                    fontSize = 16.sp
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 0.dp, max = 400.dp)      // límite de altura
+                        .verticalScroll(rememberScrollState())    // habilita scroll
+                        .padding(8.dp)
+                ) {
+                    Text(contenido)
+                }
             },
             confirmButton = {
                 TextButton(onClick = onProyectar) {

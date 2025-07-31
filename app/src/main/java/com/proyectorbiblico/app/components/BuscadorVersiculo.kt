@@ -307,7 +307,7 @@ fun BuscadorVersiculo() {
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 
-                            Button(onClick = {
+                            AppButton(onClick = {
                                 if (libroSeleccionado != null && capitulo.isNotBlank() && versiculoInicio.isNotBlank()) {
                                     loading = true
                                     coroutineScope.launch {
@@ -317,8 +317,6 @@ fun BuscadorVersiculo() {
                                         val clave = resultado.firstOrNull()?.let { it.book to it.chapter }
                                         val textoCompleto =
                                             resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
-                                        tituloModal = "${clave?.first} ${clave?.second}"
-                                        textoModal = textoCompleto
 
                                         val resumen = "${clave?.first} ${clave?.second}:${versiculoInicio}" +
                                                 if (versiculoFin.isNotBlank()) "-$versiculoFin" else ""
@@ -329,8 +327,6 @@ fun BuscadorVersiculo() {
                                         if (historialBusqueda.none { it.referencia == item.referencia }) {
                                             historialBusqueda.add(0, item)
                                         }
-
-                                        mostrarModal = true
                                     }
                                 } else {
                                     Toast.makeText(
@@ -342,7 +338,7 @@ fun BuscadorVersiculo() {
                             }) {
                                 Text(if (loading) "Buscando..." else "🔍 Buscar")
                             }
-                            Button(onClick = {
+                            AppButton(onClick = {
                                 libroInput = ""
                                 libroSeleccionado = null
                                 capitulo = ""
@@ -381,24 +377,23 @@ fun BuscadorVersiculo() {
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = {
+                        AppButton(onClick = {
                             if (busquedaLibre.isNotBlank()) {
                                 loading = true
                                 coroutineScope.launch {
                                     resultado = fetchBusquedaLibre()
                                     loading = false
 
-                                    val clave = resultado.firstOrNull()?.let { it.book to it.chapter }
-                                    val textoCompleto =
-                                        resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
-                                    tituloModal = "${clave?.first} ${clave?.second}"
-                                    textoModal = textoCompleto
+                                    tituloModal = "Resultados de “$busquedaLibre”"
+                                    textoModal = resultado.joinToString("\n\n") {
+                                        "${it.book} ${it.chapter}:${it.number} — ${it.verse}"
+                                    }
 
                                     mostrarModal = true
                                 }
                             }
                         }) {
-                            Text(if (loading) "Buscando..." else "🔍 Buscar libre")
+                            Text(if (loading) "Buscando..." else "🔍 Buscar")
                         }
                     }
                 }
@@ -489,7 +484,6 @@ fun BuscadorVersiculo() {
                 }
             }
         }
-
         item {
             ModalTexto(
                 mostrar = mostrarModal,
@@ -513,9 +507,6 @@ fun BuscadorVersiculo() {
                 }
             )
         }
-                //Spacer(modifier = Modifier.height(16.dp))
-
-
 }
 }
 data class LibroBiblia(val nombres: List<String>, val abrev: String)

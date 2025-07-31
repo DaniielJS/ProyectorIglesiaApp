@@ -1,5 +1,6 @@
 package com.proyectorbiblico.app
 
+import MyAppTheme
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -14,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
@@ -22,7 +22,7 @@ import com.proyectorbiblico.app.components.*
 import com.proyectorbiblico.app.model.ArchivoMultimedia
 import com.proyectorbiblico.app.model.TipoArchivo
 import com.proyectorbiblico.app.presentation.getExternalDisplay
-import com.proyectorbiblico.app.ui.theme.AppTheme
+
 
 class MainActivity : ComponentActivity() {
 
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AppTheme {
+            MyAppTheme {
                 val archivos = remember { mutableStateListOf<ArchivoMultimedia>() }
                 var trigger by remember { mutableStateOf(0) }
                 var selectedTab by remember { mutableStateOf(TabSeccion.VISUALES) }
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     Spacer(modifier = Modifier.height(8.dp))
 
-                                    Button(onClick = {
+                                    AppButton(onClick = {
                                         abrirSelectorDeCarpeta {
                                             archivos.clear()
                                             archivos.addAll(it)
