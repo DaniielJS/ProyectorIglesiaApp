@@ -6,7 +6,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,16 +20,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.proyectorbiblico.app.MediaController
 import com.proyectorbiblico.app.model.ArchivoMultimedia
+import com.proyectorbiblico.app.model.HistorialItem
 import com.proyectorbiblico.app.model.ResultadoBusquedaLibre
 import com.proyectorbiblico.app.model.TipoArchivo
 import com.proyectorbiblico.app.model.VersiculoBusquedaLibre
 import com.proyectorbiblico.app.presentation.getExternalDisplay
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -43,6 +49,8 @@ fun BuscadorVersiculo() {
     val versiculoInicioFocus = remember { FocusRequester() }
     val versiculoFinFocus = remember { FocusRequester() }
 
+    val historialBusqueda = remember { mutableStateListOf<HistorialItem>() }
+
     var libroInput by remember { mutableStateOf("") }
     var libroSeleccionado by remember { mutableStateOf<LibroBiblia?>(null) }
     var expanded by remember { mutableStateOf(false) }
@@ -55,6 +63,11 @@ fun BuscadorVersiculo() {
     var busquedaLibre by remember { mutableStateOf("") }
     var resultado by remember { mutableStateOf<List<VersiculoBusquedaLibre>>(emptyList()) }
 
+    var mostrarModal by remember { mutableStateOf(false) }
+    var textoModal by remember { mutableStateOf("") }
+    var tituloModal by remember { mutableStateOf("") }
+    var expandirVersiculo by remember { mutableStateOf(true) }
+    var expandirBusquedaLibre by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         libroFocus.requestFocus()
     }
@@ -129,6 +142,7 @@ fun BuscadorVersiculo() {
             LibroBiblia(listOf("Apocalipsis", "Revelation"), "AP")
         )
     }
+
     val librosFiltrados = librosDisponibles.filter {
         it.nombres.any { n -> n.contains(libroInput, ignoreCase = true) }
     }
@@ -177,165 +191,293 @@ fun BuscadorVersiculo() {
         }
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(modifier = Modifier.weight(1f)) {
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = libroInput,
-                        onValueChange = {
-                            libroInput = it
-                            expanded = true
-                        },
-                        label = { Text("Libro") },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                            .focusRequester(libroFocus)
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        librosFiltrados.forEach { libro ->
-                            DropdownMenuItem(
-                                text = { Text(libro.nombres.first()) },
-                                onClick = {
-                                    libroSeleccionado = libro
-                                    libroInput = libro.nombres.first()
-                                    expanded = false
-                                    focusManager.moveFocus(FocusDirection.Next)
-                                    coroutineScope.launch {
-                                        capituloFocus.requestFocus()
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            OutlinedTextField(
-                value = capitulo,
-                onValueChange = {
-                    capitulo = it.filter { c -> c.isDigit() }
-                    if (it.isNotEmpty()) versiculoInicioFocus.requestFocus()
-                },
-                label = { Text("Cap") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                modifier = Modifier
-                    .width(80.dp)
-                    .focusRequester(capituloFocus)
-            )
-        }
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = versiculoInicio,
-                onValueChange = {
-                    versiculoInicio = it.filter { c -> c.isDigit() }
-                    if (it.isNotEmpty()) versiculoFinFocus.requestFocus()
-                },
-                label = { Text("Vers. Inicio") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                modifier = Modifier
-                    .weight(1f)
-                    .focusRequester(versiculoInicioFocus)
-            )
-
-            OutlinedTextField(
-                value = versiculoFin,
-                onValueChange = {
-                    versiculoFin = it.filter { c -> c.isDigit() }
-                },
-                label = { Text("Vers. Final") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                modifier = Modifier
-                    .weight(1f)
-                    .focusRequester(versiculoFinFocus)
-            )
-        }
-
-        Button(onClick = {
-            if (libroSeleccionado != null && capitulo.isNotBlank() && versiculoInicio.isNotBlank()) {
-                loading = true
-                coroutineScope.launch {
-                    resultado = fetchVersiculoText()
-                    loading = false
-                }
-            } else {
-                Toast.makeText(context, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show()
-            }
-        }, modifier = Modifier.fillMaxWidth()) {
-            Text("🔍 Buscar Versículo")
-        }
-
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
-        Text("Búsqueda libre", style = MaterialTheme.typography.labelLarge)
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = busquedaLibre,
-                onValueChange = { busquedaLibre = it },
-                label = { Text("Texto completo") },
-                modifier = Modifier.weight(1f)
-            )
-
-            Button(onClick = {
-                if (busquedaLibre.isNotBlank()) {
-                    loading = true
-                    coroutineScope.launch {
-                        resultado = fetchBusquedaLibre()
-                        loading = false
-                    }
-                }
-            }) {
-                Text(if (loading) "Buscando..." else "🔍 Buscar")
-            }
-        }
-
-        if (resultado.isNotEmpty()) {
-            val agrupado = resultado.groupBy { it.book to it.chapter }
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
-                agrupado.forEach { (clave, lista) ->
-                    val textoCompleto = buildString {
-                        append("${clave.first} - Cap. ${clave.second}\n")
-                        append(lista.joinToString("\n") { "${it.number}. ${it.verse}" })
-                    }
-                    Column(
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 2.dp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                val display = (context as Activity).getExternalDisplay()
-                                if (display != null) {
-                                    val archivo = ArchivoMultimedia(
-                                        nombre = "${clave.first} ${clave.second}",
-                                        uri = Uri.EMPTY,
-                                        tipo = TipoArchivo.TEXTO,
-                                        texto = textoCompleto
-                                    )
-                                    MediaController.proyectar(context, display, archivo)
-                                } else {
-                                    Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
-                                }
-                            }
+                            .clickable { expandirVersiculo = !expandirVersiculo; expandirBusquedaLibre = !expandirBusquedaLibre }
                     ) {
                         Text(
-                            text = "${clave.first} ${clave.second}",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                            text = "📖 Buscar por versículo",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier
+                                .padding(12.dp)
                         )
-                        lista.forEachIndexed { i, versiculo ->
-                            Text(text = "${i + 1}. ${versiculo.verse}")
+                    }
+                    if (expandirVersiculo) {
+                        Spacer(Modifier.height(8.dp))
+                        Row( modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ExposedDropdownMenuBox(
+                                    expanded = expanded,
+                                    onExpandedChange = { expanded = !expanded },
+                                    modifier = Modifier.weight(2f)
+                                ) {
+                                    OutlinedTextField(
+                                        value = libroInput,
+                                        onValueChange = {
+                                            libroInput = it
+                                            expanded = true
+                                        },
+                                        label = { Text("Libro") },
+                                        modifier = Modifier
+                                            .menuAnchor()
+                                            .fillMaxWidth()
+                                            .focusRequester(libroFocus)
+                                    )
+
+                                    ExposedDropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false }
+                                    ) {
+                                        librosFiltrados.forEach { libro ->
+                                            DropdownMenuItem(
+                                                text = { Text(libro.nombres.first()) },
+                                                onClick = {
+                                                    libroSeleccionado = libro
+                                                    libroInput = libro.nombres.first()
+                                                    expanded = false
+                                                    focusManager.moveFocus(FocusDirection.Next)
+                                                    coroutineScope.launch {
+                                                        capituloFocus.requestFocus()
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+
+                            }
+                            OutlinedTextField(
+                                value = capitulo,
+                                onValueChange = {
+                                    capitulo = it.filter { c -> c.isDigit() }
+                                    if (it.isNotEmpty() && it.length >= 2) versiculoInicioFocus.requestFocus()
+                                },
+                                label = { Text("Capit.") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(capituloFocus)
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                            OutlinedTextField(
+                                value = versiculoInicio,
+                                onValueChange = {
+                                    versiculoInicio = it.filter { c -> c.isDigit() }
+                                    if (it.isNotEmpty() && it.length >= 2) versiculoFinFocus.requestFocus()
+                                },
+                                label = { Text("Vers. Inicio") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(versiculoInicioFocus)
+                            )
+
+                            OutlinedTextField(
+                                value = versiculoFin,
+                                onValueChange = {
+                                    versiculoFin = it.filter { c -> c.isDigit() }
+                                },
+                                label = { Text("Vers. Final") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .focusRequester(versiculoFinFocus)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                            Button(onClick = {
+                                if (libroSeleccionado != null && capitulo.isNotBlank() && versiculoInicio.isNotBlank()) {
+                                    loading = true
+                                    coroutineScope.launch {
+                                        resultado = fetchVersiculoText()
+                                        loading = false
+
+                                        val clave = resultado.firstOrNull()?.let { it.book to it.chapter }
+                                        val textoCompleto =
+                                            resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
+                                        tituloModal = "${clave?.first} ${clave?.second}"
+                                        textoModal = textoCompleto
+
+                                        val resumen = "${clave?.first} ${clave?.second}:${versiculoInicio}" +
+                                                if (versiculoFin.isNotBlank()) "-$versiculoFin" else ""
+
+                                        val contenido = textoCompleto
+
+                                        val item = HistorialItem(referencia = resumen, contenido = contenido)
+                                        if (historialBusqueda.none { it.referencia == item.referencia }) {
+                                            historialBusqueda.add(0, item)
+                                        }
+
+                                        mostrarModal = true
+                                    }
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Completa todos los campos correctamente",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }) {
+                                Text(if (loading) "Buscando..." else "🔍 Buscar")
+                            }
+                            Button(onClick = {
+                                libroInput = ""
+                                libroSeleccionado = null
+                                capitulo = ""
+                                versiculoInicio = ""
+                                versiculoFin = ""
+                                busquedaLibre = ""
+                                resultado = emptyList()
+                                coroutineScope.launch {
+                                    libroFocus.requestFocus()
+                                }
+                            }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Limpiar")
+                            }
                         }
                     }
                 }
             }
         }
-    }
-}
+        item {
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "🔍 Búsqueda libre",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { expandirBusquedaLibre = !expandirBusquedaLibre; expandirVersiculo = !expandirVersiculo }
+                    )
 
+                    if (expandirBusquedaLibre) {
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = busquedaLibre,
+                            onValueChange = { busquedaLibre = it },
+                            label = { Text("Búsqueda libre") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = {
+                            if (busquedaLibre.isNotBlank()) {
+                                loading = true
+                                coroutineScope.launch {
+                                    resultado = fetchBusquedaLibre()
+                                    loading = false
+
+                                    val clave = resultado.firstOrNull()?.let { it.book to it.chapter }
+                                    val textoCompleto =
+                                        resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
+                                    tituloModal = "${clave?.first} ${clave?.second}"
+                                    textoModal = textoCompleto
+
+                                    mostrarModal = true
+                                }
+                            }
+                        }) {
+                            Text(if (loading) "Buscando..." else "🔍 Buscar libre")
+                        }
+                    }
+                }
+            }
+        }
+// --- SECCIÓN: Búsqueda libre ---
+        item {
+            Column(modifier = Modifier.padding(top = 16.dp)) {
+                Text(
+                    text = "🕘 Últimos versículos buscados",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                historialBusqueda.take(5).forEach { item ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(6.dp)) {
+                            Text(
+                                text = item.referencia,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = item.contenido.lines().firstOrNull()?.take(80) ?: "",
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.End,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+
+                                TextButton(onClick = {
+                                    val display = (context as Activity).getExternalDisplay()
+                                    if (display != null) {
+                                        val archivo = ArchivoMultimedia(
+                                            nombre = item.referencia,
+                                            uri = Uri.EMPTY,
+                                            tipo = TipoArchivo.TEXTO,
+                                            texto = item.contenido
+                                        )
+                                        MediaController.proyectar(context, display, archivo)
+                                    } else {
+                                        Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
+                                    }
+                                }) {
+                                    Text("Proyectar")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        item {
+            ModalTexto(
+                mostrar = mostrarModal,
+                onCerrar = { mostrarModal = false },
+                titulo = tituloModal,
+                contenido = textoModal,
+                onProyectar = {
+                    val display = (context as Activity).getExternalDisplay()
+                    if (display != null) {
+                        val archivo = ArchivoMultimedia(
+                            nombre = tituloModal,
+                            uri = Uri.EMPTY,
+                            tipo = TipoArchivo.TEXTO,
+                            texto = textoModal
+                        )
+                        MediaController.proyectar(context, display, archivo)
+                    } else {
+                        Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
+                    }
+                    mostrarModal = false
+                }
+            )
+        }
+                //Spacer(modifier = Modifier.height(16.dp))
+
+
+}
+}
 data class LibroBiblia(val nombres: List<String>, val abrev: String)
