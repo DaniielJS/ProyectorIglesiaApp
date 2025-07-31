@@ -4,23 +4,30 @@ import android.app.Activity
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.proyectorbiblico.app.MediaController
 import com.proyectorbiblico.app.model.ArchivoMultimedia
@@ -409,42 +416,72 @@ fun BuscadorVersiculo() {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            .padding(vertical = 6.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                     ) {
-                        Column(modifier = Modifier.padding(6.dp)) {
-                            Text(
-                                text = item.referencia,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = item.contenido.lines().firstOrNull()?.take(80) ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Row(
-                                horizontalArrangement = Arrangement.End,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-
-                                TextButton(onClick = {
-                                    val display = (context as Activity).getExternalDisplay()
-                                    if (display != null) {
-                                        val archivo = ArchivoMultimedia(
-                                            nombre = item.referencia,
-                                            uri = Uri.EMPTY,
-                                            tipo = TipoArchivo.TEXTO,
-                                            texto = item.contenido
+                        Column(
+                            modifier = Modifier
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(
+                                            Color(0xFF1976D2), // antes: 0xFF0D47A1
+                                            Color(0xFF64B5F6)  // antes: 0xFF1976D2
                                         )
-                                        MediaController.proyectar(context, display, archivo)
-                                    } else {
-                                        Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
-                                    }
-                                }) {
-                                    Text("Proyectar")
+                                    )
+                                )
+                                .padding(16.dp)
+                        ) {
+                            // Título: usa referencia o fallback si está en blanco
+                            Text(
+                                text = item.referencia.takeIf { it.isNotBlank() }
+                                    ?: "${libroInput} ${capitulo}:${versiculoInicio}" +
+                                    if (versiculoFin.isNotBlank()) "-${versiculoFin}" else "",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            // Snippet del versículo en texto pequeño con ellipsis
+                            Text(
+                                text = item.contenido,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.9f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            )
+                            // Botón degradado oscuro
+                            Surface(
+                                color = Color(0xFF222222),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                                    .clickable {
+                                        val display = (context as Activity).getExternalDisplay()
+                                        if (display != null) {
+                                            val archivo = ArchivoMultimedia(
+                                                nombre = item.referencia,
+                                                uri = Uri.EMPTY,
+                                                tipo = TipoArchivo.TEXTO,
+                                                texto = item.contenido
+                                            )
+                                            MediaController.proyectar(context, display, archivo)
+                                        } else {
+                                            Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                shape = RoundedCornerShape(12.dp),
+                                shadowElevation = 4.dp
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Text(
+                                        text = "Proyectar",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
                                 }
                             }
                         }
@@ -452,6 +489,7 @@ fun BuscadorVersiculo() {
                 }
             }
         }
+
         item {
             ModalTexto(
                 mostrar = mostrarModal,
