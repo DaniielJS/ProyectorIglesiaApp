@@ -16,6 +16,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -26,9 +30,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyectorbiblico.app.MediaController
 import com.proyectorbiblico.app.model.ArchivoMultimedia
 import com.proyectorbiblico.app.model.HistorialItem
@@ -46,7 +53,7 @@ import java.net.URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BuscadorVersiculo() {
+fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -56,7 +63,7 @@ fun BuscadorVersiculo() {
     val versiculoInicioFocus = remember { FocusRequester() }
     val versiculoFinFocus = remember { FocusRequester() }
 
-    val historialBusqueda = remember { mutableStateListOf<HistorialItem>() }
+    val historialBusqueda = buscadorVM.historial
 
     var libroInput by remember { mutableStateOf("") }
     var libroSeleccionado by remember { mutableStateOf<LibroBiblia?>(null) }
@@ -75,6 +82,8 @@ fun BuscadorVersiculo() {
     var tituloModal by remember { mutableStateOf("") }
     var expandirVersiculo by remember { mutableStateOf(true) }
     var expandirBusquedaLibre by remember { mutableStateOf(false) }
+    var apiError by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         libroFocus.requestFocus()
     }
@@ -304,16 +313,29 @@ fun BuscadorVersiculo() {
                                     .focusRequester(versiculoFinFocus)
                             )
                         }
+                        if (apiError.isNotEmpty()) {
+                            Text(
+                                text = apiError,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 
                             AppButton(onClick = {
                                 if (libroSeleccionado != null && capitulo.isNotBlank() && versiculoInicio.isNotBlank()) {
                                     loading = true
+                                    focusManager.clearFocus()
+                                    apiError = ""
                                     coroutineScope.launch {
-                                        resultado = fetchVersiculoText()
-                                        loading = false
-
+                                        try {
+                                            val res = fetchVersiculoText()
+                                            resultado = res
+                                            if (res.isEmpty()) {
+                                                apiError = "No se encontró el versículo ${libroInput} $capitulo:$versiculoInicio"
+                                            } else {
                                         val clave = resultado.firstOrNull()?.let { it.book to it.chapter }
                                         val textoCompleto =
                                             resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
@@ -325,7 +347,13 @@ fun BuscadorVersiculo() {
 
                                         val item = HistorialItem(referencia = resumen, contenido = contenido)
                                         if (historialBusqueda.none { it.referencia == item.referencia }) {
-                                            historialBusqueda.add(0, item)
+                                            buscadorVM.añadir(item)
+                                        }
+                                                }
+                                        } catch (e: Exception) {
+                                            apiError = e.message ?: "Error al consultar el versículo"
+                                        } finally {
+                                            loading = false
                                         }
                                     }
                                 } else {
@@ -376,20 +404,36 @@ fun BuscadorVersiculo() {
                             label = { Text("Búsqueda libre") },
                             modifier = Modifier.fillMaxWidth()
                         )
+                        if (apiError.isNotEmpty()) {
+                            Text(
+                                text = apiError,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         AppButton(onClick = {
                             if (busquedaLibre.isNotBlank()) {
                                 loading = true
+                                focusManager.clearFocus()
                                 coroutineScope.launch {
+                                    try {
                                     resultado = fetchBusquedaLibre()
-                                    loading = false
-
-                                    tituloModal = "Resultados de “$busquedaLibre”"
-                                    textoModal = resultado.joinToString("\n\n") {
-                                        "${it.book} ${it.chapter}:${it.number} — ${it.verse}"
+                                    if (resultado.isEmpty()) {
+                                        apiError = "No se encontraron resultados para \"$busquedaLibre\""
+                                    } else {
+                                        tituloModal = "Resultados de “$busquedaLibre”"
+                                        textoModal = resultado.joinToString("\n\n") {
+                                            "${it.book} ${it.chapter}:${it.number} — ${it.verse}"
+                                        }
+                                        mostrarModal = true
                                     }
-
-                                    mostrarModal = true
+                                    } catch (e: Exception) {
+                                        apiError = e.message ?: "Error inesperado"
+                                    } finally {
+                                        loading = false
+                                    }
                                 }
                             }
                         }) {
@@ -510,3 +554,14 @@ fun BuscadorVersiculo() {
 }
 }
 data class LibroBiblia(val nombres: List<String>, val abrev: String)
+class BuscadorViewModel : ViewModel() {
+    // MutableStateList que sobrevive a recomposiciones y cambios de configuración
+    private val _historial = mutableStateListOf<HistorialItem>()
+    val historial: SnapshotStateList<HistorialItem> = _historial
+
+    fun añadir(hist: HistorialItem) {
+        if (_historial.none { it.referencia == hist.referencia }) {
+            _historial.add(0, hist)
+        }
+    }
+}
