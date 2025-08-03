@@ -13,13 +13,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.proyectorbiblico.app.MediaController
+import com.proyectorbiblico.app.MediaPresentation
 import com.proyectorbiblico.app.model.TipoArchivo
 import com.proyectorbiblico.app.presentation.getExternalDisplay
 
 @Composable
 fun ControlMultimedia(tipo: TipoArchivo) {
-    var isPlaying by remember { mutableStateOf(true) }
-    var volume by remember { mutableStateOf(1f) }
+    var isPlaying by remember { mutableStateOf(MediaController.isPlaying(tipo)) }
+
+    LaunchedEffect(tipo) {
+        isPlaying = MediaController.isPlaying(tipo)
+    }
+
+    var volume by remember { mutableStateOf(MediaController.getVolume(tipo)) }
 
     val context = LocalContext.current
     val display = (context as? Activity)?.getExternalDisplay()

@@ -24,10 +24,19 @@ object MediaController {
         return Pair(player.currentPosition, player.isPlaying)
     }
 
-    fun getVideoPlayer(): ExoPlayer? = videoPresentation?.getVideoPlayer()
-    fun getVideoMediaItem(): MediaItem? {
-        return videoPresentation?.archivo?.uri?.let { uri ->
-            MediaItem.fromUri(uri)
+    fun isPlaying(tipo: TipoArchivo): Boolean {
+        return when (tipo) {
+            TipoArchivo.VIDEO -> videoPresentation?.getVideoPlayer()?.isPlaying ?: false
+            TipoArchivo.AUDIO -> audioPresentation?.getAudioPlayer()?.isPlaying ?: false
+            else -> false
+        }
+    }
+
+    fun getVolume(tipo: TipoArchivo): Float {
+        return when (tipo) {
+            TipoArchivo.VIDEO -> videoPresentation?.getVideoPlayer()?.volume ?: 1f
+            TipoArchivo.AUDIO -> audioPresentation?.getAudioPlayer()?.volume ?: 1f
+            else -> 1f
         }
     }
 
@@ -85,15 +94,6 @@ object MediaController {
         }
     }
 
-    fun cerrarTodo() {
-        videoPresentation?.dismiss()
-        audioPresentation?.dismiss()
-        imagenPresentation?.dismiss()
-
-        videoPresentation = null
-        audioPresentation = null
-        imagenPresentation = null
-    }
 
     fun getActivo(tipo: TipoArchivo): ArchivoMultimedia? {
         return when (tipo) {

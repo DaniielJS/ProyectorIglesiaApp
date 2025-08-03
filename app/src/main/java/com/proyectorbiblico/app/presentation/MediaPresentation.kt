@@ -86,8 +86,24 @@ class MediaPresentation(
             player.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     if (playbackState == Player.STATE_ENDED) {
-                        // por ejemplo, cerrar la Presentation
-                        dismiss()
+                        // 🔇 FadeOut de volumen
+                        Thread {
+                            val steps = 10
+                            val delayMs = 100L
+                            for (i in steps downTo 0) {
+                                val vol = i / steps.toFloat()
+                                player.volume = vol
+                                Thread.sleep(delayMs)
+                            }
+                            // 🟦 Fade visual
+                            playerView.animate()
+                                .alpha(0f)
+                                .setDuration(1000)
+                                .withEndAction {
+                                    dismiss() // cierra la presentación al final
+                                }
+                                .start()
+                        }.start()
                     }
                 }
             })
@@ -126,4 +142,5 @@ class MediaPresentation(
         exoVideoPlayer = null
         exoAudioPlayer = null
     }
+
 }

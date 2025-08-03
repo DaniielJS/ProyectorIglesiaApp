@@ -84,7 +84,7 @@ fun VistaProyeccionActual(
                             factory = {
                                 PlayerView(it).apply {
                                     player = previewPlayer
-                                    useController = false // ✅ sin controles
+                                    useController = true // ✅ sin controles
                                 }
                             },
                             modifier = Modifier
