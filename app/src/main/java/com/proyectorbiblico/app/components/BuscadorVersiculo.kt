@@ -498,11 +498,16 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                     .clickable {
                                         val display = (context as Activity).getExternalDisplay()
                                         if (display != null) {
+                                            val textoConTitulo = buildString {
+                                                append(item.referencia)
+                                                append("\n\n")
+                                                append(item.contenido)
+                                            }
                                             val archivo = ArchivoMultimedia(
                                                 nombre = item.referencia,
                                                 uri = Uri.EMPTY,
                                                 tipo = TipoArchivo.TEXTO,
-                                                texto = item.contenido
+                                                texto = textoConTitulo
                                             )
                                             MediaController.proyectar(context, display, archivo)
                                         } else {

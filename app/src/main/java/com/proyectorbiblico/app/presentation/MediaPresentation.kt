@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.bumptech.glide.Glide
@@ -77,10 +78,20 @@ class MediaPresentation(
         exoVideoPlayer?.release()
         exoVideoPlayer = ExoPlayer.Builder(context).build().also { player ->
             playerView.player = player
-            playerView.useController = false  // 👈 Este es el cambio clave
+            playerView.useController = false
             playerView.visibility = View.VISIBLE
             player.setMediaItem(MediaItem.fromUri(uri))
-            player.repeatMode = ExoPlayer.REPEAT_MODE_ONE
+            player.repeatMode = ExoPlayer.REPEAT_MODE_OFF  // sin loop
+
+            player.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) {
+                        // por ejemplo, cerrar la Presentation
+                        dismiss()
+                    }
+                }
+            })
+
             player.prepare()
             player.playWhenReady = true
         }
