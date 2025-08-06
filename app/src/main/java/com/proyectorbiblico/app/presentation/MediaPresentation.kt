@@ -15,6 +15,10 @@ import androidx.media3.ui.PlayerView
 import com.bumptech.glide.Glide
 import com.proyectorbiblico.app.model.ArchivoMultimedia
 import com.proyectorbiblico.app.model.TipoArchivo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MediaPresentation(
     context: Context,
@@ -86,24 +90,29 @@ class MediaPresentation(
             player.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     if (playbackState == Player.STATE_ENDED) {
-                        // 🔇 FadeOut de volumen
-                        Thread {
-                            val steps = 10
+                        // Ejecutar en hilo principal
+                        CoroutineScope(Dispatchers.Main).launch {
+                            val steps = 15
                             val delayMs = 100L
                             for (i in steps downTo 0) {
                                 val vol = i / steps.toFloat()
                                 player.volume = vol
-                                Thread.sleep(delayMs)
+                                delay(delayMs)
                             }
-                            // 🟦 Fade visual
+
+                            // Fade visual
                             playerView.animate()
                                 .alpha(0f)
                                 .setDuration(1000)
                                 .withEndAction {
-                                    dismiss() // cierra la presentación al final
+                                    try {
+                                        dismiss()  // cierre seguro
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
                                 }
                                 .start()
-                        }.start()
+                        }
                     }
                 }
             })
