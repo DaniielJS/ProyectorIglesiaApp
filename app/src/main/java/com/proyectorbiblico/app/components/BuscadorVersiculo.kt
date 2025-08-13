@@ -1,6 +1,7 @@
 package com.proyectorbiblico.app.components
 
 import android.app.Activity
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -62,7 +63,7 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
     val capituloFocus = remember { FocusRequester() }
     val versiculoInicioFocus = remember { FocusRequester() }
     val versiculoFinFocus = remember { FocusRequester() }
-
+    val librosEnMemoria = mutableMapOf<String, Map<String, Map<String, String>>>()
     val historialBusqueda = buscadorVM.historial
 
     var libroInput by remember { mutableStateOf("") }
@@ -89,74 +90,13 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
     }
 
     val librosDisponibles = remember {
-        listOf(
-            LibroBiblia(listOf("Genesis"), "GN"),
-            LibroBiblia(listOf("Exodo", "Exodus"), "EX"),
-            LibroBiblia(listOf("Levitico", "Leviticus"), "LV"),
-            LibroBiblia(listOf("Numeros", "Numbers"), "NM"),
-            LibroBiblia(listOf("Deuteronomio", "Deuteronomy"), "DT"),
-            LibroBiblia(listOf("Josue", "Joshua"), "JOS"),
-            LibroBiblia(listOf("Jueces", "Judges"), "JUE"),
-            LibroBiblia(listOf("Rut", "Ruth"), "RT"),
-            LibroBiblia(listOf("1-Samuel"), "1S"),
-            LibroBiblia(listOf("2-Samuel"), "2S"),
-            LibroBiblia(listOf("1-Reyes", "1-Kings"), "1R"),
-            LibroBiblia(listOf("2-Reyes", "2-Kings"), "2R"),
-            LibroBiblia(listOf("1-Cronicas", "1-Chronicles"), "1CR"),
-            LibroBiblia(listOf("2-Cronicas", "2-Chronicles"), "2CR"),
-            LibroBiblia(listOf("Esdras", "Ezra"), "ESD"),
-            LibroBiblia(listOf("Nehemias", "Nehemiah"), "NEH"),
-            LibroBiblia(listOf("Ester", "Esther"), "EST"),
-            LibroBiblia(listOf("Job"), "JOB"),
-            LibroBiblia(listOf("Salmos", "Psalms"), "SAL"),
-            LibroBiblia(listOf("Proverbios", "Proverbs"), "PR"),
-            LibroBiblia(listOf("Eclesiastes", "Ecclesiastes"), "EC"),
-            LibroBiblia(listOf("Cantares", "Song of Solomon"), "CNT"),
-            LibroBiblia(listOf("Isaias", "Isaiah"), "IS"),
-            LibroBiblia(listOf("Jeremias", "Jeremiah"), "JER"),
-            LibroBiblia(listOf("Lamentaciones", "Lamentations"), "LM"),
-            LibroBiblia(listOf("Ezequiel", "Ezekiel"), "EZ"),
-            LibroBiblia(listOf("Daniel"), "DN"),
-            LibroBiblia(listOf("Oseas", "Hosea"), "OS"),
-            LibroBiblia(listOf("Joel"), "JL"),
-            LibroBiblia(listOf("Amos"), "AM"),
-            LibroBiblia(listOf("Abdias", "Obadiah"), "ABD"),
-            LibroBiblia(listOf("Jonas", "Jonah"), "JON"),
-            LibroBiblia(listOf("Miqueas", "Micah"), "MI"),
-            LibroBiblia(listOf("Nahum"), "NAH"),
-            LibroBiblia(listOf("Habacuc", "Habakkuk"), "HAB"),
-            LibroBiblia(listOf("Sofonias", "Zephaniah"), "SOF"),
-            LibroBiblia(listOf("Hageo", "Haggai"), "HAG"),
-            LibroBiblia(listOf("Zacarias", "Zechariah"), "ZAC"),
-            LibroBiblia(listOf("Malaquias", "Malachi"), "MAL"),
-            LibroBiblia(listOf("Mateo", "Matthew"), "MT"),
-            LibroBiblia(listOf("Marcos", "Mark"), "MR"),
-            LibroBiblia(listOf("Lucas", "Luke"), "LC"),
-            LibroBiblia(listOf("Juan", "John"), "JN"),
-            LibroBiblia(listOf("Hechos", "Acts"), "HCH"),
-            LibroBiblia(listOf("Romanos", "Romans"), "RO"),
-            LibroBiblia(listOf("1-Corintios", "Corinthians"), "1CO"),
-            LibroBiblia(listOf("2-Corintios", "2-Corinthians"), "2CO"),
-            LibroBiblia(listOf("Galatas", "Galatians"), "GA"),
-            LibroBiblia(listOf("Efesios", "Ephesians"), "EF"),
-            LibroBiblia(listOf("Filipenses", "Philippians"), "FIL"),
-            LibroBiblia(listOf("Colosenses", "Colossians"), "COL"),
-            LibroBiblia(listOf("1-Tesalonicenses", "1-Thessalonians"), "1TS"),
-            LibroBiblia(listOf("2-Tesalonicenses", "2-Thessalonians"), "2TS"),
-            LibroBiblia(listOf("1-Timoteo", "Timothy"), "1TI"),
-            LibroBiblia(listOf("2-Timoteo", "2-Timothy"), "2TI"),
-            LibroBiblia(listOf("Tito", "Titus"), "TIT"),
-            LibroBiblia(listOf("Filemon", "Philemon"), "FLM"),
-            LibroBiblia(listOf("Hebreos", "Hebrews"), "HE"),
-            LibroBiblia(listOf("Santiago", "James"), "STG"),
-            LibroBiblia(listOf("1-Pedro", "1-Peter"), "1P"),
-            LibroBiblia(listOf("2-Pedro", "2-Peter"), "2P"),
-            LibroBiblia(listOf("1-Juan", "1-John"), "1JN"),
-            LibroBiblia(listOf("2-Juan", "2-John"), "2JN"),
-            LibroBiblia(listOf("3-Juan", "3-John"), "3JN"),
-            LibroBiblia(listOf("Judas", "Jude"), "JUD"),
-            LibroBiblia(listOf("Apocalipsis", "Revelation"), "AP")
-        )
+        val archivos = context.assets.list("bible")?.filter { it.endsWith(".json") } ?: emptyList()
+
+        archivos.map { nombreArchivo ->
+            val base = nombreArchivo.removeSuffix(".json") // Ej: "1juan"
+            val display = formatNombreLibro(base)
+            LibroBiblia(nombres = listOf(display), abrev = base)
+        }.sortedBy { it.nombres.first() }
     }
 
     val librosFiltrados = librosDisponibles.filter {
@@ -182,6 +122,45 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                 Log.e("BUSQUEDA", "Error al parsear versículo", e)
                 emptyList()
             }
+        }
+    }
+
+    suspend fun buscarVersiculosLocal(
+        context: Context,
+        libro: String,
+        capitulo: String,
+        versiculoInicio: String,
+        versiculoFin: String?
+    ): List<VersiculoBusquedaLibre> = withContext(Dispatchers.IO) {
+        try {
+            val nombreArchivo = libro.lowercase().replace(" ", "")  // ej. "1 - Juan" → "1juan"
+
+            // Si no está en memoria, cargar desde assets
+            val libroData = librosEnMemoria.getOrPut(nombreArchivo) {
+                val json = context.assets.open("bible/$nombreArchivo.json").bufferedReader().use { it.readText() }
+                Json.decodeFromString<Map<String, Map<String, String>>>(json)
+            }
+
+            val capitulos = libroData[capitulo] ?: return@withContext emptyList()
+
+            // Rango de versículos
+            val ini = versiculoInicio.toIntOrNull() ?: return@withContext emptyList()
+            val fin = versiculoFin?.toIntOrNull() ?: ini
+
+            (ini..fin).mapNotNull { num ->
+                val texto = capitulos[num.toString()] ?: return@mapNotNull null
+                VersiculoBusquedaLibre(
+                    book = libro,
+                    chapter = capitulo.toInt(),
+                    number = num,
+                    verse = texto,
+                    id = 0,
+                    study = ""
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("BUSQUEDA", "Error al buscar versículo local", e)
+            emptyList()
         }
     }
 
@@ -331,16 +310,21 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                     apiError = ""
                                     coroutineScope.launch {
                                         try {
-                                            val res = fetchVersiculoText()
-                                            resultado = res
-                                            if (res.isEmpty()) {
+                                            resultado = buscarVersiculosLocal(
+                                                context = context,
+                                                libro = libroSeleccionado?.abrev ?: return@launch,
+                                                capitulo = capitulo,
+                                                versiculoInicio = versiculoInicio,
+                                                versiculoFin = versiculoFin
+                                            )
+                                            if (resultado.isEmpty()) {
                                                 apiError = "No se encontró el versículo ${libroInput} $capitulo:$versiculoInicio"
                                             } else {
                                         val clave = resultado.firstOrNull()?.let { it.book to it.chapter }
                                         val textoCompleto =
                                             resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
 
-                                        val resumen = "${clave?.first} ${clave?.second}:${versiculoInicio}" +
+                                        val resumen = "${clave?.first?.let { formatNombreLibro(it) }} ${clave?.second}:${versiculoInicio}" +
                                                 if (versiculoFin.isNotBlank()) "-$versiculoFin" else ""
 
                                         val contenido = textoCompleto
@@ -558,6 +542,20 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
         }
 }
 }
+
+fun formatNombreLibro(base: String): String {
+    val nombreFormateado = base.replaceFirstChar { it.uppercaseChar() }
+
+    return if (nombreFormateado.first().isDigit()) {
+        val index = nombreFormateado.indexOfFirst { it.isLetter() }
+        val numero = nombreFormateado.substring(0, index)
+        val texto = nombreFormateado.substring(index).replaceFirstChar { it.uppercaseChar() }
+        "$numero - $texto"
+    } else {
+        nombreFormateado
+    }
+}
+
 data class LibroBiblia(val nombres: List<String>, val abrev: String)
 class BuscadorViewModel : ViewModel() {
     // MutableStateList que sobrevive a recomposiciones y cambios de configuración

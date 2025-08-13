@@ -7,8 +7,8 @@
         android:id="@+id/fondoVersiculo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/fondo_versiculo"
+        android:scaleType="fitXY"
+        android:src="@drawable/fondo"
         android:visibility="gone" />
 
     <androidx.media3.ui.PlayerView
@@ -42,6 +42,7 @@
         android:textStyle="bold|italic"
         android:gravity="center"
         android:paddingBottom="16dp"
+        android:background="@drawable/fondo_transparente"
         android:visibility="gone" />
 
     <!-- Texto de los versículos -->
@@ -54,6 +55,8 @@
         android:textStyle="bold"
         android:gravity="center"
         android:textAlignment="center"
+        android:padding="8dp"
+        android:background="@drawable/fondo_transparente"
         android:visibility="gone" />
     </LinearLayout>
 </FrameLayout>
