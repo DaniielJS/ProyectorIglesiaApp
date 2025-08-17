@@ -418,7 +418,7 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
-                            }) {
+                            }, modifier = Modifier.weight(1f)){
                                 Text(if (loading) "Buscando..." else "🔍 Buscar")
                             }
                             AppButton(onClick = {
