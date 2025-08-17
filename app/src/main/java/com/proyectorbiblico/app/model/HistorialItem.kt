@@ -1,3 +1,8 @@
-package com.proyectorbiblico.app.model
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-data class HistorialItem(val referencia: String, val contenido: String)
+@Parcelize
+data class HistorialItem(
+    val referencia: String,
+    val contenido: String
+) : Parcelable

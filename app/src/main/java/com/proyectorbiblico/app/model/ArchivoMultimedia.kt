@@ -6,7 +6,8 @@ data class ArchivoMultimedia(
     val nombre: String,
     val uri: Uri,
     val tipo: TipoArchivo,
-    val texto: String? = null // Usado solo si tipo == TEXTO
+    val texto: String? = null,
+    val secciones: List<SeccionVersiculo>? = null
 )
 
 enum class TipoArchivo {

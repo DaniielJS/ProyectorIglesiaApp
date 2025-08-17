@@ -1,5 +1,6 @@
 package com.proyectorbiblico.app
 
+import android.annotation.SuppressLint
 import android.app.Presentation
 import android.content.Context
 import android.net.Uri
@@ -7,6 +8,7 @@ import android.os.Bundle
 import android.view.Display
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -33,13 +35,15 @@ class MediaPresentation(
     private lateinit var imageView: ImageView
     private lateinit var textoView: TextView
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.presentation_layout)
 
         playerView = findViewById(R.id.playerView)
         imageView = findViewById(R.id.imageView)
-        textoView = findViewById(R.id.versiculoTextView)
+        //textoView = findViewById(R.id.versiculoTextView)
+// Referencias (asegúrate de tener estos ids en tu XML)
 
         when (archivo.tipo) {
             TipoArchivo.IMAGEN -> mostrarImagen(archivo.uri)
@@ -52,23 +56,52 @@ class MediaPresentation(
 
     private fun mostrarVersiculo(texto: String) {
         val fondo = findViewById<ImageView>(R.id.fondoVersiculo)
-        val titulo = findViewById<TextView>(R.id.tituloVersiculoTextView)
-        val cuerpo = findViewById<TextView>(R.id.versiculoTextView)
-        val contenedor = findViewById<View>(R.id.contenedorTexto)
-
         fondo.visibility = View.VISIBLE
-        contenedor.visibility = View.VISIBLE
 
-        // Separar título de contenido
-        val lineas = texto.lines()
-        val tituloTexto = lineas.firstOrNull() ?: ""
-        val cuerpoTexto = lineas.drop(1).joinToString("\n")
+        val contenedorGeneral = findViewById<LinearLayout>(R.id.contenedorGeneral)
+        val titulo1 = findViewById<TextView>(R.id.tituloSeccion1)
+        val texto1 = findViewById<TextView>(R.id.textoSeccion1)
+        val titulo2 = findViewById<TextView>(R.id.tituloSeccion2)
+        val texto2 = findViewById<TextView>(R.id.textoSeccion2)
+        val separador = findViewById<View>(R.id.separadorLineal) // ponle id al <View> línea
 
-        titulo.text = tituloTexto
-        titulo.visibility = View.VISIBLE
+        val secciones = archivo.secciones
 
-        cuerpo.text = cuerpoTexto
-        cuerpo.visibility = View.VISIBLE
+        if (!secciones.isNullOrEmpty()) {
+            // Muestra contenedor de secciones
+            contenedorGeneral.visibility = View.VISIBLE
+
+            // Sección 1 (siempre)
+            val s1 = secciones[0]
+            titulo1.text = s1.titulo
+            texto1.text = s1.texto
+
+            if (secciones.size >= 2) {
+                // Sección 2 + separador visibles
+                val s2 = secciones[1]
+                titulo2.text = s2.titulo
+                texto2.text = s2.texto
+                titulo2.visibility = View.VISIBLE
+                texto2.visibility = View.VISIBLE
+                separador.visibility = View.VISIBLE
+            } else {
+                // Solo primera sección
+                titulo2.visibility = View.GONE
+                texto2.visibility = View.GONE
+                separador.visibility = View.GONE
+            }
+            return
+        }
+
+        // Fallback: comportamiento anterior con "texto" plano
+        if (!archivo.texto.isNullOrBlank()) {
+            contenedorGeneral.visibility = View.VISIBLE
+            titulo1.text = "" // o el título previo si lo separas con tu propio formato
+            texto1.text = archivo.texto
+            titulo2.visibility = View.GONE
+            texto2.visibility = View.GONE
+            separador.visibility = View.GONE
+        }
     }
 
     private fun mostrarImagen(uri: Uri) {
