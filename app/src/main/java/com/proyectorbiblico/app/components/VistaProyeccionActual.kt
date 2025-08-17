@@ -57,51 +57,41 @@ fun VistaProyeccionActual(
                 }
 
                 TipoArchivo.VIDEO -> {
+                    // dentro de VistaProyeccionActual, case TipoArchivo.VIDEO
                     val context = LocalContext.current
                     val uri = activo.uri
 
-                    // 1) Un único player para la vista previa
+// 1) Un único player para la preview
                     val previewPlayer = remember {
                         ExoPlayer.Builder(context).build().apply {
-                            volume = 0f          // 🔇 silenciar preview
+                            volume = 0f // preview sin sonido
                         }
                     }
 
-                    // 2) Cargar el nuevo video cuando cambia el uri
-                    //    (si quieres arrancar siempre desde 0, deja initialPosition = 0L)
-                    val (initialPosition, _) = MediaController.getVideoPlaybackInfo() ?: (0L to false)
-                    LaunchedEffect(uri) {
-                        previewPlayer.stop() // detén lo anterior
-                        previewPlayer.setMediaItem(MediaItem.fromUri(uri))
-                        previewPlayer.prepare()
-                        previewPlayer.seekTo(initialPosition)
-                        previewPlayer.playWhenReady = true
-                    }
-
-                    // 3) Liberar recursos al salir
-                    DisposableEffect(Unit) {
+// 2) Registrar este player en el MediaController
+                    DisposableEffect(previewPlayer) {
+                        MediaController.previewPlayer = previewPlayer
                         onDispose {
-                            // Desacopla el player de la vista y libera
+                            if (MediaController.previewPlayer === previewPlayer) {
+                                MediaController.previewPlayer = null
+                            }
                             previewPlayer.release()
                         }
                     }
 
-                    // 4) Asegurar que el PlayerView use SIEMPRE este player
+// 3) Cargar/actualizar el video cuando cambie el uri
+                    LaunchedEffect(uri) {
+                        previewPlayer.stop()
+                        previewPlayer.setMediaItem(MediaItem.fromUri(uri))
+                        previewPlayer.prepare()
+                        previewPlayer.play()   // o .pause() si quieres que empiece pausado
+                    }
+
+// 4) Asegura que el PlayerView use este player
                     AndroidView(
-                        factory = { ctx ->
-                            PlayerView(ctx).apply {
-                                useController = false  // pon false si no quieres controles en la preview
-                                player = previewPlayer
-                            }
-                        },
-                        update = { view ->
-                            if (view.player !== previewPlayer) {
-                                view.player = previewPlayer
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
+                        factory = { ctx -> PlayerView(ctx).apply { player = previewPlayer; useController = false } },
+                        update = { view -> if (view.player !== previewPlayer) view.player = previewPlayer },
+                        modifier = Modifier.fillMaxWidth().height(200.dp)
                     )
                 }
 

@@ -108,7 +108,8 @@ object MediaController {
         when (tipo) {
             TipoArchivo.VIDEO -> {
                 videoPresentation?.setPlayWhenReady(play)
-                previewPlayer?.playWhenReady = play }
+                if (play) previewPlayer?.play() else previewPlayer?.pause()
+            }
             TipoArchivo.AUDIO -> audioPresentation?.setPlayWhenReady(play)
             else -> {}
         }
