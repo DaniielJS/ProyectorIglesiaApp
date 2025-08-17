@@ -80,6 +80,7 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
     var seccion2 by rememberSaveable { mutableStateOf<HistorialItem?>(null) }
     var segundaSeccionActiva by rememberSaveable { mutableStateOf(false) }
 
+
 // === HELPERS como lambdas (dentro del Composable) ===
     val proyectarSolo: (HistorialItem) -> Unit = { item ->
         seccion1 = item
@@ -223,6 +224,27 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
         }
     }
 
+    val totalVersiculosCapitulo by produceState<Int?>(
+        initialValue = null,
+        key1 = libroSeleccionado?.abrev,
+        key2 = capitulo
+    ) {
+        val abrev = libroSeleccionado?.abrev
+        if (abrev.isNullOrBlank() || capitulo.isBlank()) {
+            value = null
+            return@produceState
+        }
+
+        // Cargar si falta
+        val libroData = librosEnMemoria.getOrPut(abrev) {
+            val json = context.assets.open("bible/$abrev.json").bufferedReader().use { it.readText() }
+            Json.decodeFromString<Map<String, Map<String, String>>>(json)
+        }
+
+        val capKey = capitulo.trimStart('0').ifEmpty { capitulo } // por si escriben "01"
+        value = libroData[capKey]?.size
+    }
+
     suspend fun fetchBusquedaLibre(): List<VersiculoBusquedaLibre> {
         return withContext(Dispatchers.IO) {
             try {
@@ -355,6 +377,14 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                     .weight(1f)
                                     .focusRequester(versiculoFinFocus)
                             )
+                            // Label con el total de versículos
+                            if (totalVersiculosCapitulo != null) {
+                                Text(
+                                    text = "Total: $totalVersiculosCapitulo",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                )
+                            }
                         }
                         if (apiError.isNotEmpty()) {
                             Text(
@@ -385,7 +415,7 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                                 apiError =
                                                     "No se encontró el versículo ${libroInput} $capitulo:$versiculoInicio"
                                             } else {
-                                                val clave = resultado.firstOrNull()
+                                                /*val clave = resultado.firstOrNull()
                                                     ?.let { it.book to it.chapter }
                                                 val textoCompleto =
                                                     resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
@@ -402,6 +432,30 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                                 )
                                                 if (historialBusqueda.none { it.referencia == item.referencia }) {
                                                     buscadorVM.añadir(item)
+                                                }*/
+                                                val bloques = resultado.chunked(3)
+
+                                                bloques.forEach { grupo ->
+                                                    val clave = grupo.firstOrNull()
+                                                        ?.let { it.book to it.chapter }
+
+                                                    val resumen = buildString {
+                                                        append("${clave?.first?.let { formatNombreLibro(it) }} ${clave?.second}:${grupo.first().number}")
+                                                        if (grupo.size > 1) {
+                                                            append("-${grupo.last().number}")
+                                                        }
+                                                    }
+
+                                                    val contenido = grupo.joinToString("\n") { "${it.number}. ${it.verse}" }
+
+                                                    val item = HistorialItem(
+                                                        referencia = resumen,
+                                                        contenido = contenido
+                                                    )
+
+                                                    if (historialBusqueda.none { it.referencia == item.referencia }) {
+                                                        buscadorVM.añadir(item)
+                                                    }
                                                 }
                                             }
                                         } catch (e: Exception) {
@@ -510,7 +564,7 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                historialBusqueda.take(5).forEach { item ->
+                historialBusqueda.take(50).forEach { item ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
