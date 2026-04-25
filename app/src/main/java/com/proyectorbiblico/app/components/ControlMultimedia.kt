@@ -77,48 +77,19 @@ fun ControlMultimedia(tipo: TipoArchivo) {
             ) {
                 Row(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .height(40.dp)
                         .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.VolumeUp, contentDescription = "Volumen")
-                    Slider(
-                        value = volume,
-                        onValueChange = {
+                    VolumeBar(
+                        volume = volume,
+                        onVolumeChange = {
                             volume = it
                             MediaController.setVolume(tipo, it)
-                        },
-                        valueRange = 0f..1f,
-                        modifier = Modifier.weight(1f)
+                        }
                     )
                 }
-            }
-        }
-
-        // Botón Reproyectar
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(35.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable {
-                        if (display != null) {
-                            MediaController.reproyectarActivo(context, display, tipo)
-                        } else {
-                            Toast.makeText(context, "No hay pantalla externa", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(Icons.Default.Refresh, contentDescription = "Reproyectar")
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Reproyectar sin reiniciar", style = MaterialTheme.typography.labelLarge)
             }
         }
     }

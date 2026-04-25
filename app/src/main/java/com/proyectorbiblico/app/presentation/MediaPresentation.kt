@@ -54,9 +54,20 @@ class MediaPresentation(
         }
     }
 
-    private fun mostrarVersiculo(texto: String) {
+    private fun cambiarFondo(resId: Int) {
         val fondo = findViewById<ImageView>(R.id.fondoVersiculo)
+        fondo.setImageResource(resId)
         fondo.visibility = View.VISIBLE
+    }
+    private val fondosVersiculos = listOf(
+        R.drawable.fondo1,
+        R.drawable.fondo
+    )
+    private fun fondoAleatorio(): Int {
+        return fondosVersiculos.random()
+    }
+    private fun mostrarVersiculo(texto: String) {
+        cambiarFondo(fondoAleatorio())
 
         val contenedorGeneral = findViewById<LinearLayout>(R.id.contenedorGeneral)
         val titulo1 = findViewById<TextView>(R.id.tituloSeccion1)
