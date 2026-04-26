@@ -71,6 +71,19 @@ class MainActivity : ComponentActivity() {
                                 BuscadorVersiculo()
                             }
 
+                            TabSeccion.WEB -> {
+                                PanelWeb(onImageClick = { imagen ->
+                                    Toast.makeText(this@MainActivity, "Seleccionando imagen: ${imagen.titulo}", Toast.LENGTH_SHORT).show()
+                                    val archivo = ArchivoMultimedia(
+                                        nombre = imagen.titulo,
+                                        uri = android.net.Uri.parse(imagen.url),
+                                        tipo = TipoArchivo.IMAGEN,
+                                        texto = imagen.descripcion
+                                    )
+                                    proyectarArchivo(archivo)
+                                })
+                            }
+
                             TabSeccion.VISUALES -> {
                                 Column(
                                     modifier = Modifier
@@ -193,6 +206,7 @@ class MainActivity : ComponentActivity() {
 
     private fun proyectarArchivo(archivo: ArchivoMultimedia) {
         val display = getExternalDisplay()
+        Toast.makeText(this, "Display ID: ${display?.displayId ?: "null"}", Toast.LENGTH_SHORT).show()
         if (display != null) {
             MediaController.proyectar(this, display, archivo)
         } else {

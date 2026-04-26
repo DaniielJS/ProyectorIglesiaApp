@@ -116,8 +116,9 @@ class MediaPresentation(
     }
 
     private fun mostrarImagen(uri: Uri) {
+        val imageSource = uri.toString()
         imageView.apply {
-            Glide.with(context).load(uri).into(this)
+            Glide.with(context).load(imageSource).into(this)
             visibility = View.VISIBLE
         }
     }
