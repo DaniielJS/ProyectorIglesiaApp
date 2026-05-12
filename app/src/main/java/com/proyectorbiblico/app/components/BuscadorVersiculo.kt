@@ -627,7 +627,28 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                     }
                                 }
                             }
-
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 8.dp)) {
+                                AppButton(onClick = {
+                                    coroutineScope.launch {
+                                        val next = getNextReference(context, item.referencia)
+                                        if (next != null) {
+                                            buscadorVM.updateItem(item, next)
+                                        }
+                                    }
+                                }) {
+                                    Text("+")
+                                }
+                                AppButton(onClick = {
+                                    coroutineScope.launch {
+                                        val prev = getPreviousReference(context, item.referencia)
+                                        if (prev != null) {
+                                            buscadorVM.updateItem(item, prev)
+                                        }
+                                    }
+                                }) {
+                                    Text("-")
+                                }
+                            }
                         }
                     }
                 }
@@ -637,6 +658,138 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
     }
 }
 
+fun parseReferencia(ref: String): Triple<String, Int, Pair<Int, Int?>>? {
+    val parts = ref.split(" ")
+    if (parts.size < 2) return null
+    val book = parts.dropLast(1).joinToString(" ")
+    val last = parts.last()
+    val chapVerse = last.split(":")
+    if (chapVerse.size != 2) return null
+    val chapter = chapVerse[0].toIntOrNull() ?: return null
+    val verses = chapVerse[1].split("-")
+    val start = verses[0].toIntOrNull() ?: return null
+    val end = if (verses.size > 1) verses[1].toIntOrNull() else null
+    return Triple(book, chapter, start to end)
+}
+
+suspend fun getNextReference(context: Context, referencia: String): HistorialItem? = withContext(Dispatchers.IO) {
+    try {
+        val parsed = parseReferencia(referencia) ?: return@withContext null
+        val (book, chapter, verseRange) = parsed
+        val (start, end) = verseRange
+
+        val newStart: Int
+        var newEnd: Int?
+
+        if (end == null) {
+            // Single verse, next is start + 1
+            newStart = start + 1
+            newEnd = null
+        } else {
+            // Range, add the next verse to the range
+            newStart = start
+            newEnd = end + 1
+        }
+
+        // Load the book data
+        val nombreArchivo = book.lowercase().replace(" ", "").replace("-", "")
+        val libroData = context.assets.open("bible/$nombreArchivo.json").bufferedReader().use { it.readText() }
+        val data = Json.decodeFromString<Map<String, Map<String, String>>>(libroData)
+        val chapterData = data[chapter.toString()] ?: return@withContext null
+
+        // Check if the new verses exist
+        val versiculos = mutableListOf<VersiculoBusquedaLibre>()
+        val ini = newStart
+        val fin = newEnd ?: newStart
+        for (num in ini..fin) {
+            val texto = chapterData[num.toString()] ?: return@withContext null
+            versiculos.add(VersiculoBusquedaLibre(
+                book = book,
+                chapter = chapter,
+                number = num,
+                verse = texto,
+                id = 0,
+                study = ""
+            ))
+        }
+
+        // Create new reference and content
+        val newReference = if (newEnd == null) {
+            "$book $chapter:$newStart"
+        } else {
+            "$book $chapter:$newStart-$newEnd"
+        }
+
+        val newContent = versiculos.joinToString("\n") { "${it.number}. ${it.verse}" }
+
+        HistorialItem(newReference, newContent, isFromSearch = false)
+    } catch (e: Exception) {
+        Log.e("Buscador", "Error al obtener la siguiente referencia", e)
+        null
+    }
+}
+
+suspend fun getPreviousReference(context: Context, referencia: String): HistorialItem? = withContext(Dispatchers.IO) {
+    try {
+        val parsed = parseReferencia(referencia) ?: return@withContext null
+        val (book, chapter, verseRange) = parsed
+        val (start, end) = verseRange
+
+        val newStart: Int
+        var newEnd: Int?
+
+        if (end == null) {
+            // Single verse, add the previous verse to make a range
+            newStart = start - 1
+            newEnd = start
+            if (newStart < 1) return@withContext null // No previous verse
+        } else {
+            // Range, remove the last verse
+            newStart = start
+            newEnd = end - 1
+            if (newEnd < newStart) {
+                // If it becomes a single verse, set end to null
+                newEnd = null
+            }
+        }
+
+        // Load the book data
+        val nombreArchivo = book.lowercase().replace(" ", "").replace("-", "")
+        val libroData = context.assets.open("bible/$nombreArchivo.json").bufferedReader().use { it.readText() }
+        val data = Json.decodeFromString<Map<String, Map<String, String>>>(libroData)
+        val chapterData = data[chapter.toString()] ?: return@withContext null
+
+        // Check if the new verses exist
+        val versiculos = mutableListOf<VersiculoBusquedaLibre>()
+        val ini = newStart
+        val fin = newEnd ?: newStart
+        for (num in ini..fin) {
+            val texto = chapterData[num.toString()] ?: return@withContext null
+            versiculos.add(VersiculoBusquedaLibre(
+                book = book,
+                chapter = chapter,
+                number = num,
+                verse = texto,
+                id = 0,
+                study = ""
+            ))
+        }
+
+        // Create new reference and content
+        val newReference = if (newEnd == null) {
+            "$book $chapter:$newStart"
+        } else {
+            "$book $chapter:$newStart-$newEnd"
+        }
+
+        val newContent = versiculos.joinToString("\n") { "${it.number}. ${it.verse}" }
+
+        HistorialItem(newReference, newContent, isFromSearch = false)
+    } catch (e: Exception) {
+        Log.e("Buscador", "Error al obtener la referencia anterior", e)
+        null
+    }
+}
 
 fun formatNombreLibro(base: String): String {
     val nombreFormateado = base.replaceFirstChar { it.uppercaseChar() }
@@ -660,6 +813,13 @@ class BuscadorViewModel : ViewModel() {
     fun añadir(hist: HistorialItem) {
         if (_historial.none { it.referencia == hist.referencia }) {
             _historial.add(0, hist)
+        }
+    }
+
+    fun updateItem(old: HistorialItem, new: HistorialItem) {
+        val index = _historial.indexOf(old)
+        if (index >= 0) {
+            _historial[index] = new
         }
     }
 }
