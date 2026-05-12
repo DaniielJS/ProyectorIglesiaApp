@@ -1,45 +1,164 @@
 package com.proyectorbiblico.app.components
 
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.proyectorbiblico.app.model.ArchivoMultimedia
 import com.proyectorbiblico.app.model.TipoArchivo
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LISTA PRINCIPAL (usada en MainActivity para audio/imagen/video)
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 fun ListaArchivosMultimedia(
     archivos: List<ArchivoMultimedia>,
+    tipoVisible: TipoArchivo? = null,
     onArchivoSeleccionado: (ArchivoMultimedia) -> Unit
 ) {
-    val imagenes = archivos.filter { it.tipo == TipoArchivo.IMAGEN }
-    val audios = archivos.filter { it.tipo == TipoArchivo.AUDIO }
-    val videos = archivos.filter { it.tipo == TipoArchivo.VIDEO }
+    val archivosFiltrados =
+        if (tipoVisible != null) archivos.filter { it.tipo == tipoVisible }
+        else archivos
 
+    when (tipoVisible) {
+
+        // ── AUDIO: lista vertical compacta, sin fondo ──────────────────────
+        TipoArchivo.AUDIO -> {
+            Column {
+                archivosFiltrados.forEach { archivo ->
+                    ItemArchivoCompacto(
+                        archivo = archivo,
+                        onClick = { onArchivoSeleccionado(archivo) }
+                    )
+                }
+            }
+        }
+
+        // ── IMAGEN / VIDEO: chips en wrap horizontal ───────────────────────
+        TipoArchivo.IMAGEN,
+        TipoArchivo.VIDEO -> {
+            // FlowRow: se va a la línea siguiente cuando no cabe más
+            // Requiere foundation >= 1.4 / material3 con FlowRow experimental
+            // Si no tienes FlowRow, usa el bloque alternativo comentado abajo.
+            @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                archivosFiltrados.forEach { archivo ->
+                    ChipArchivo(
+                        archivo = archivo,
+                        onClick = { onArchivoSeleccionado(archivo) }
+                    )
+                }
+            }
+        }
+
+        // ── FALLBACK: lista genérica ───────────────────────────────────────
+        else -> {
+            Column {
+                archivosFiltrados.forEach { archivo ->
+                    ItemArchivoCompacto(
+                        archivo = archivo,
+                        onClick = { onArchivoSeleccionado(archivo) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ITEM DE AUDIO: fila con icono + nombre, sin fondo llamativo
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun ItemArchivoCompacto(
+    archivo: ArchivoMultimedia,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = 400.dp)
-            .padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+            .clickable { onClick() }
+            .padding(vertical = 6.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        TipoColumnaCard(Icons.Default.Image to "Imágenes", imagenes, onArchivoSeleccionado)
-        TipoColumnaCard(Icons.Default.MusicNote to "Audios", audios, onArchivoSeleccionado)
-        TipoColumnaCard(Icons.Default.Videocam to "Videos", videos, onArchivoSeleccionado)
+        ThumbnailForArchivo(
+            archivo = archivo,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = archivo.nombre,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHIP DE IMAGEN/VIDEO: miniatura cuadrada + nombre corto
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun ChipArchivo(
+    archivo: ArchivoMultimedia,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        tonalElevation = 1.dp,
+        modifier = Modifier.widthIn(max = 160.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            ThumbnailForArchivo(
+                archivo = archivo,
+                modifier = Modifier.size(64.dp)   // ← ajusta este valor a gusto
+            )
+            Text(
+                text = archivo.nombre,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COLUMNA CARD (no cambia, se deja igual)
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 fun RowScope.TipoColumnaCard(
@@ -54,7 +173,9 @@ fun RowScope.TipoColumnaCard(
             .weight(1f)
             .padding(4.dp)
             .heightIn(max = 280.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Column(
             modifier = Modifier
@@ -78,17 +199,11 @@ fun RowScope.TipoColumnaCard(
                         .clickable { onClick(archivo) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    when (archivo.tipo) {
-                        TipoArchivo.IMAGEN -> Icon(Icons.Default.Image, contentDescription = "Imagen", modifier = Modifier.size(24.dp))
-                        TipoArchivo.VIDEO -> Icon(Icons.Default.Videocam, contentDescription = "Video", modifier = Modifier.size(24.dp))
-                        TipoArchivo.AUDIO -> Icon(Icons.Default.MusicNote, contentDescription = "Audio", modifier = Modifier.size(24.dp))
-                        else -> Icon(Icons.Default.Description, contentDescription = "Archivo", modifier = Modifier.size(24.dp))
-                    }
-
+                    ThumbnailForArchivo(archivo = archivo, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-
                     Text(
-                        text = archivo.nombre.take(25) + if (archivo.nombre.length > 25) "..." else "",
+                        text = archivo.nombre.take(25) +
+                                if (archivo.nombre.length > 25) "…" else "",
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -96,5 +211,57 @@ fun RowScope.TipoColumnaCard(
                 }
             }
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THUMBNAIL
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun ThumbnailForArchivo(archivo: ArchivoMultimedia, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    when (archivo.tipo) {
+        TipoArchivo.IMAGEN -> {
+            AsyncImage(
+                model = archivo.uri.toString(),
+                contentDescription = archivo.nombre,
+                modifier = modifier,
+                contentScale = ContentScale.Crop
+            )
+        }
+        TipoArchivo.VIDEO -> {
+            val bitmap = remember { mutableStateOf<Bitmap?>(null) }
+            LaunchedEffect(archivo.uri) {
+                try {
+                    val retriever = MediaMetadataRetriever()
+                    retriever.setDataSource(context, archivo.uri)
+                    bitmap.value = retriever.getFrameAtTime(1_000_000L)
+                    retriever.release()
+                } catch (_: Exception) { }
+            }
+            bitmap.value?.let {
+                Image(
+                    bitmap = it.asImageBitmap(),
+                    contentDescription = archivo.nombre,
+                    modifier = modifier,
+                    contentScale = ContentScale.Crop
+                )
+            } ?: Icon(
+                Icons.Default.Videocam,
+                contentDescription = "Video",
+                modifier = modifier
+            )
+        }
+        TipoArchivo.AUDIO -> Icon(
+            Icons.Default.MusicNote,
+            contentDescription = "Audio",
+            modifier = modifier
+        )
+        else -> Icon(
+            Icons.Default.Description,
+            contentDescription = "Archivo",
+            modifier = modifier
+        )
     }
 }

@@ -4,5 +4,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class HistorialItem(
     val referencia: String,
-    val contenido: String
+    val contenido: String,
+    val isFromSearch: Boolean = false
 ) : Parcelable

@@ -32,7 +32,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyectorbiblico.app.MediaController
 import com.proyectorbiblico.app.model.ArchivoMultimedia
-import com.proyectorbiblico.app.model.ResultadoBusquedaLibre
 import com.proyectorbiblico.app.model.SeccionVersiculo
 import com.proyectorbiblico.app.model.TipoArchivo
 import com.proyectorbiblico.app.model.VersiculoBusquedaLibre
@@ -41,7 +40,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import java.net.URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,11 +65,6 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
     var loading by remember { mutableStateOf(false) }
 
     var busquedaLibre by remember { mutableStateOf("") }
-    var resultado by remember { mutableStateOf<List<VersiculoBusquedaLibre>>(emptyList()) }
-
-    var mostrarModal by remember { mutableStateOf(false) }
-    var textoModal by remember { mutableStateOf("") }
-    var tituloModal by remember { mutableStateOf("") }
     var expandirVersiculo by remember { mutableStateOf(true) }
     var expandirBusquedaLibre by remember { mutableStateOf(false) }
     var apiError by remember { mutableStateOf("") }
@@ -163,28 +156,6 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
         it.nombres.any { n -> n.contains(libroInput, ignoreCase = true) }
     }
 
-    /*suspend fun fetchVersiculoText(): List<VersiculoBusquedaLibre> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val versiculoFinal = versiculoFin.takeIf { it.isNotBlank() }?.let { "-$it" } ?: ""
-                val url = "https://bible-api.deno.dev/api/read/rv1960/${libroSeleccionado?.nombres?.first()}/${capitulo}/${versiculoInicio}$versiculoFinal"
-                val json = URL(url).readText()
-                Log.d("BUSQUEDA", "JSON recibido: $json")
-                val parsed = if (json.trim().startsWith("[")) {
-                    Json.decodeFromString<List<VersiculoBusquedaLibre>>(json)
-                } else {
-                    listOf(Json.decodeFromString<VersiculoBusquedaLibre>(json))
-                }
-                parsed.map {
-                    it.copy(book = libroSeleccionado?.nombres?.first() ?: "", chapter = capitulo.toIntOrNull() ?: 0)
-                }
-            } catch (e: Exception) {
-                Log.e("BUSQUEDA", "Error al parsear versículo", e)
-                emptyList()
-            }
-        }
-    }*/
-
     suspend fun buscarVersiculosLocal(
         context: Context,
         libro: String,
@@ -245,25 +216,57 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
         value = libroData[capKey]?.size
     }
 
-    suspend fun fetchBusquedaLibre(): List<VersiculoBusquedaLibre> {
+    suspend fun buscarLibreLocal(query: String): List<HistorialItem> {
         return withContext(Dispatchers.IO) {
-            try {
-                val query = busquedaLibre.trim().replace(" ", "%20")
-                val url = "https://bible-api.deno.dev/api/read/nvi/search?q=$query"
-                val json = URL(url).readText()
-                Log.d("BUSQUEDA", "JSON recibido: $json")
+            val words = query.trim().split("\\s+".toRegex()).filter { it.isNotBlank() }
+            val results = mutableListOf<HistorialItem>()
+            val lowerQuery = query.lowercase()
 
-                val jsonParser = Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
+            // For complete phrase: find 2 verses
+            var phraseCount = 0
+            val allBooks = librosDisponibles.map { it.abrev }
+            for (book in allBooks) {
+                if (phraseCount >= 2) break
+                val libroData = librosEnMemoria.getOrPut(book) {
+                    val json = context.assets.open("bible/$book.json").bufferedReader().use { it.readText() }
+                    Json.decodeFromString<Map<String, Map<String, String>>>(json)
                 }
-
-                val parsed = jsonParser.decodeFromString<ResultadoBusquedaLibre>(json)
-                parsed.data
-            } catch (e: Exception) {
-                Log.e("BUSQUEDA", "Error en búsqueda libre", e)
-                emptyList()
+                for ((chapter, verses) in libroData) {
+                    if (phraseCount >= 2) break
+                    for ((verseNum, text) in verses) {
+                        if (text.lowercase().contains(lowerQuery) && phraseCount < 2) {
+                            val ref = "${formatNombreLibro(book)} $chapter:$verseNum"
+                            results.add(HistorialItem(ref, text, isFromSearch = true))
+                            phraseCount++
+                        }
+                    }
+                }
             }
+
+            // For each word: find 1 verse per word
+            for (word in words) {
+                var found = false
+                val lowerWord = word.lowercase()
+                for (book in allBooks) {
+                    if (found) break
+                    val libroData = librosEnMemoria.getOrPut(book) {
+                        val json = context.assets.open("bible/$book.json").bufferedReader().use { it.readText() }
+                        Json.decodeFromString<Map<String, Map<String, String>>>(json)
+                    }
+                    for ((chapter, verses) in libroData) {
+                        if (found) break
+                        for ((verseNum, text) in verses) {
+                            if (text.lowercase().contains(lowerWord) && !found) {
+                                val ref = "${formatNombreLibro(book)} $chapter:$verseNum"
+                                results.add(HistorialItem(ref, text, isFromSearch = true))
+                                found = true
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            results
         }
     }
 
@@ -404,36 +407,18 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                     apiError = ""
                                     coroutineScope.launch {
                                         try {
-                                            resultado = buscarVersiculosLocal(
+                                            val versiculos = buscarVersiculosLocal(
                                                 context = context,
                                                 libro = libroSeleccionado?.abrev ?: return@launch,
                                                 capitulo = capitulo,
                                                 versiculoInicio = versiculoInicio,
                                                 versiculoFin = versiculoFin
                                             )
-                                            if (resultado.isEmpty()) {
+                                            if (versiculos.isEmpty()) {
                                                 apiError =
                                                     "No se encontró el versículo ${libroInput} $capitulo:$versiculoInicio"
                                             } else {
-                                                /*val clave = resultado.firstOrNull()
-                                                    ?.let { it.book to it.chapter }
-                                                val textoCompleto =
-                                                    resultado.joinToString("\n") { "${it.number}. ${it.verse}" }
-
-                                                val resumen =
-                                                    "${clave?.first?.let { formatNombreLibro(it) }} ${clave?.second}:${versiculoInicio}" +
-                                                            if (versiculoFin.isNotBlank()) "-$versiculoFin" else ""
-
-                                                val contenido = textoCompleto
-
-                                                val item = HistorialItem(
-                                                    referencia = resumen,
-                                                    contenido = contenido
-                                                )
-                                                if (historialBusqueda.none { it.referencia == item.referencia }) {
-                                                    buscadorVM.añadir(item)
-                                                }*/
-                                                val bloques = resultado.chunked(3)
+                                                val bloques = versiculos.chunked(3)
 
                                                 bloques.forEach { grupo ->
                                                     val clave = grupo.firstOrNull()
@@ -482,7 +467,6 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                 versiculoInicio = ""
                                 versiculoFin = ""
                                 busquedaLibre = ""
-                                resultado = emptyList()
                                 coroutineScope.launch {
                                     libroFocus.requestFocus()
                                 }
@@ -531,16 +515,10 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                 focusManager.clearFocus()
                                 coroutineScope.launch {
                                     try {
-                                        resultado = fetchBusquedaLibre()
-                                        if (resultado.isEmpty()) {
-                                            apiError =
-                                                "No se encontraron resultados para \"$busquedaLibre\""
-                                        } else {
-                                            tituloModal = "Resultados de “$busquedaLibre”"
-                                            textoModal = resultado.joinToString("\n\n") {
-                                                "${it.book} ${it.chapter}:${it.number} — ${it.verse}"
-                                            }
-                                            mostrarModal = true
+                                        val resultados = buscarLibreLocal(busquedaLibre)
+                                        resultados.forEach { buscadorVM.añadir(it) }
+                                        if (resultados.isEmpty()) {
+                                            apiError = "No se encontraron resultados para \"$busquedaLibre\""
                                         }
                                     } catch (e: Exception) {
                                         apiError = e.message ?: "Error inesperado"
@@ -576,10 +554,11 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                             modifier = Modifier
                                 .background(
                                     Brush.horizontalGradient(
-                                        listOf(
-                                            Color(0xFF1976D2), // antes: 0xFF0D47A1
-                                            Color(0xFF64B5F6)  // antes: 0xFF1976D2
-                                        )
+                                        if (item.isFromSearch) {
+                                            listOf(Color(0xFF388E3C), Color(0xFF81C784))
+                                        } else {
+                                            listOf(Color(0xFF1976D2), Color(0xFF64B5F6))
+                                        }
                                     )
                                 )
                                 .padding(16.dp)
