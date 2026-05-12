@@ -18,6 +18,7 @@ object ImagenService {
             val randomId = random.nextInt(1000)
             ImagenBusqueda(
                 url = "https://picsum.photos/200/300?random=$randomId",
+                thumbnail = "https://picsum.photos/50/50?random=$randomId",
                 titulo = "Imagen aleatoria $i",
                 descripcion = "Imagen de respaldo aleatoria"
             )
@@ -33,7 +34,7 @@ object ImagenService {
                 }
 
                 val encoded = URLEncoder.encode(query, "UTF-8")
-                val url = "https://serpapi.com/search?engine=google_images&q=$encoded&api_key=$SERPAPI_KEY&num=$limite"
+                val url = "https://serpapi.com/search?engine=google_images&q=$encoded&api_key=$SERPAPI_KEY&num=$limite&imgsz=xga"
 
                 val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
                 connection.requestMethod = "GET"
@@ -58,15 +59,18 @@ object ImagenService {
                 for (i in 0 until maxResults) {
                     try {
                         val result = imagesResults.get(i).asJsonObject
-                        val imageUrl = result.get("original")?.asString
-                            ?: result.get("thumbnail")?.asString
+
                         val title = result.get("title")?.asString ?: query
                         val link = result.get("link")?.asString ?: ""
 
-                        if (!imageUrl.isNullOrEmpty()) {
+                        val original = result.get("original")?.asString
+                        val thumbnail = result.get("thumbnail")?.asString
+
+                        if (!original.isNullOrEmpty() && !thumbnail.isNullOrEmpty()) {
                             imagenes.add(
                                 ImagenBusqueda(
-                                    url = imageUrl,
+                                    url = original,          // HD
+                                    thumbnail = thumbnail,   // liviano
                                     titulo = title,
                                     descripcion = link
                                 )

@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ImagenBusqueda(
     val url: String,
+    val thumbnail: String,    // MINIATURA (lista)
     val titulo: String = "",
     val descripcion: String = ""
 )

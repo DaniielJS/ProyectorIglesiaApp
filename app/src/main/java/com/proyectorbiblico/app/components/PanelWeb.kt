@@ -64,7 +64,7 @@ fun PanelWeb(onImageClick: (ImagenBusqueda) -> Unit = {}) {
                         errorMensaje = ""
                         coroutineScope.launch {
                             try {
-                                imagenes = ImagenService.buscarImagenes(urlInput, 10)
+                                imagenes = ImagenService.buscarImagenes(urlInput, 20)
                                 if (imagenes.isEmpty()) {
                                     errorMensaje = "No se encontraron imágenes"
                                 }
@@ -132,7 +132,7 @@ fun PanelWeb(onImageClick: (ImagenBusqueda) -> Unit = {}) {
                         onClick = { onImageClick(imagen) }
                     ) {
                         AsyncImage(
-                            model = imagen.url,
+                            model = imagen.thumbnail,
                             contentDescription = imagen.titulo,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
