@@ -97,14 +97,7 @@ fun PanelWeb(onImageClick: (ImagenBusqueda) -> Unit = {}) {
 
         // Loading indicator
         if (loading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
         }
 
         // Galería de imágenes

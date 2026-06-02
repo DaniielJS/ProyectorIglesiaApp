@@ -10,7 +10,7 @@ import java.util.Random
 
 object ImagenService {
 
-    private const val SERPAPI_KEY = "f4e11dd873ea20aae8607248f4107c9f33ffdd55f0887c4114b7eb230e5fda4f"
+    private const val SERPAPI_KEY = "--"
 
     private fun getRandomImages(count: Int): List<ImagenBusqueda> {
         val random = Random()

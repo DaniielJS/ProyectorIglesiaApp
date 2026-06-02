@@ -474,6 +474,9 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                 Text("Limpiar")
                             }
                         }
+                        if (loading) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+                        }
                     }
                 }
             }
@@ -529,6 +532,9 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                             }
                         }) {
                             Text(if (loading) "Buscando..." else "🔍 Buscar")
+                        }
+                        if (loading) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
                         }
                     }
                 }

@@ -37,7 +37,8 @@ data class DownloadState(
     val fileName: String,
     var progress: Float = 0f,
     var status: String = "Descargando...",
-    var isCompleted: Boolean = false
+    var isCompleted: Boolean = false,
+    var hasContentLength: Boolean = false
 )
 
 class MainActivity : ComponentActivity() {
@@ -120,12 +121,20 @@ class MainActivity : ComponentActivity() {
                                         ) {
                                             Text(state.fileName, modifier = Modifier.weight(1f))
                                             if (!state.isCompleted) {
-                                                LinearProgressIndicator(
-                                                    progress = state.progress,
-                                                    modifier = Modifier
-                                                        .weight(1f)
-                                                        .padding(horizontal = 8.dp)
-                                                )
+                                                if (state.hasContentLength) {
+                                                    LinearProgressIndicator(
+                                                        progress = state.progress,
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .padding(horizontal = 8.dp)
+                                                    )
+                                                } else {
+                                                    LinearProgressIndicator(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .padding(horizontal = 8.dp)
+                                                    )
+                                                }
                                             }
                                             Text(state.status, style = MaterialTheme.typography.bodySmall)
                                         }
@@ -527,6 +536,8 @@ class MainActivity : ComponentActivity() {
                     fileName
                 )
 
+                val startTime = System.currentTimeMillis()
+
                 withContext(Dispatchers.IO) {
 
                     val url = URL(imagen.url)
@@ -539,6 +550,8 @@ class MainActivity : ComponentActivity() {
                     connection.connect()
 
                     val contentLength = connection.contentLength
+
+                    state.hasContentLength = contentLength > 0
 
                     val input = connection.inputStream
 
@@ -556,9 +569,20 @@ class MainActivity : ComponentActivity() {
 
                         totalBytesRead += bytesRead
 
+                        val elapsed = System.currentTimeMillis() - startTime
+
+                        if (elapsed > 0) {
+
+                            val speedKBps = (totalBytesRead / 1024.0) / (elapsed / 1000.0)
+
+                            state.status = "Descargando... ${speedKBps.toInt()} KB/s"
+
+                        }
+
                         if (contentLength > 0) {
 
                             state.progress = totalBytesRead.toFloat() / contentLength.toFloat()
+
                         }
                     }
 
