@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyectorbiblico.app.MediaController
+import com.proyectorbiblico.app.R
 import com.proyectorbiblico.app.model.ArchivoMultimedia
 import com.proyectorbiblico.app.model.SeccionVersiculo
 import com.proyectorbiblico.app.model.TipoArchivo
@@ -72,7 +73,7 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
     var seccion1 by rememberSaveable { mutableStateOf<HistorialItem?>(null) }
     var seccion2 by rememberSaveable { mutableStateOf<HistorialItem?>(null) }
     var segundaSeccionActiva by rememberSaveable { mutableStateOf(false) }
-
+    var fondoSeleccionado by remember { mutableStateOf<Int?>(null) }
 
 // === HELPERS como lambdas (dentro del Composable) ===
     val proyectarSolo: (HistorialItem) -> Unit = { item ->
@@ -91,7 +92,8 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                         titulo = item.referencia,
                         texto = item.contenido
                     )
-                )
+                ),
+                fondoSeleccionado = fondoSeleccionado
             )
             MediaController.proyectar(context, display, archivo)
         } else {
@@ -112,7 +114,8 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                     secciones = listOf(
                         SeccionVersiculo(s1.referencia, s1.contenido),
                         SeccionVersiculo(s2.referencia, s2.contenido)
-                    )
+                    ),
+                    fondoSeleccionado = fondoSeleccionado
                 )
                 MediaController.proyectar(context, display, archivo)
             } else {
@@ -298,6 +301,62 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                     }
                     if (expandirVersiculo) {
                         Spacer(Modifier.height(8.dp))
+                        
+                        // Selector de fondos para versículos
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "🎨 Fondo del versículo:",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Fondo 1
+                                ElevatedButton(
+                                    onClick = {
+                                        fondoSeleccionado = R.drawable.fondo
+                                        MediaController.cambiarFondoVersiculo(R.drawable.fondo)
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(60.dp),
+                                    colors = ButtonDefaults.elevatedButtonColors(
+                                        containerColor = if (fondoSeleccionado == R.drawable.fondo)
+                                            MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                        contentColor = if (fondoSeleccionado == R.drawable.fondo)
+                                            MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                ) {
+                                    Text("Fondo 1")
+                                }
+                                
+                                // Fondo 2
+                                ElevatedButton(
+                                    onClick = {
+                                        fondoSeleccionado = R.drawable.fondo1
+                                        MediaController.cambiarFondoVersiculo(R.drawable.fondo1)
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(60.dp),
+                                    colors = ButtonDefaults.elevatedButtonColors(
+                                        containerColor = if (fondoSeleccionado == R.drawable.fondo1)
+                                            MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                        contentColor = if (fondoSeleccionado == R.drawable.fondo1)
+                                            MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                ) {
+                                    Text("Fondo 2")
+                                }
+                            }
+                        }
+                        
+                        Spacer(Modifier.height(8.dp))
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -653,6 +712,11 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                                     }
                                 }) {
                                     Text("-")
+                                }
+                                AppButton(onClick = {
+                                    buscadorVM.historial.remove(item)
+                                }, modifier = Modifier.width(48.dp)) {
+                                    Text("✕")
                                 }
                             }
                         }

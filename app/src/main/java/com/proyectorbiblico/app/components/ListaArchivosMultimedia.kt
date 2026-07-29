@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Videocam
@@ -35,7 +36,8 @@ import com.proyectorbiblico.app.model.TipoArchivo
 fun ListaArchivosMultimedia(
     archivos: List<ArchivoMultimedia>,
     tipoVisible: TipoArchivo? = null,
-    onArchivoSeleccionado: (ArchivoMultimedia) -> Unit
+    onArchivoSeleccionado: (ArchivoMultimedia) -> Unit,
+    onArchivoEliminar: ((ArchivoMultimedia) -> Unit)? = null
 ) {
     val archivosFiltrados =
         if (tipoVisible != null) archivos.filter { it.tipo == tipoVisible }
@@ -70,7 +72,8 @@ fun ListaArchivosMultimedia(
                 archivosFiltrados.forEach { archivo ->
                     ChipArchivo(
                         archivo = archivo,
-                        onClick = { onArchivoSeleccionado(archivo) }
+                        onClick = { onArchivoSeleccionado(archivo) },
+                        onEliminar = if (onArchivoEliminar != null) {{ onArchivoEliminar(archivo) }} else null
                     )
                 }
             }
@@ -128,8 +131,11 @@ private fun ItemArchivoCompacto(
 @Composable
 private fun ChipArchivo(
     archivo: ArchivoMultimedia,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onEliminar: (() -> Unit)? = null
 ) {
+    var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
+    
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
@@ -137,22 +143,70 @@ private fun ChipArchivo(
         tonalElevation = 1.dp,
         modifier = Modifier.widthIn(max = 160.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            ThumbnailForArchivo(
-                archivo = archivo,
-                modifier = Modifier.size(64.dp)   // ← ajusta este valor a gusto
-            )
-            Text(
-                text = archivo.nombre,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        Box(modifier = Modifier.padding(6.dp)) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                ThumbnailForArchivo(
+                    archivo = archivo,
+                    modifier = Modifier.size(64.dp)
+                )
+                Text(
+                    text = archivo.nombre,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            // Botón de eliminar en la esquina superior derecha
+            if (onEliminar != null) {
+                IconButton(
+                    onClick = { mostrarDialogoConfirmacion = true },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(24.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Eliminar",
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
         }
+    }
+    
+    // Diálogo de confirmación
+    if (mostrarDialogoConfirmacion && onEliminar != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoConfirmacion = false },
+            title = { Text("Eliminar archivo") },
+            text = { Text("¿Eliminar '${archivo.nombre}' del almacenamiento?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onEliminar()
+                        mostrarDialogoConfirmacion = false
+                    }
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { mostrarDialogoConfirmacion = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

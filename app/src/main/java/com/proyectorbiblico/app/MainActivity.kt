@@ -246,6 +246,10 @@ class MainActivity : ComponentActivity() {
                                                     onArchivoSeleccionado = { archivo ->
                                                         proyectarArchivo(archivo)
                                                         trigger++
+                                                    },
+                                                    onArchivoEliminar = { archivo ->
+                                                        archivos.remove(archivo)
+                                                        eliminarArchivo(archivo)
                                                     }
                                                 )
                                             }
@@ -278,6 +282,10 @@ class MainActivity : ComponentActivity() {
                                                     onArchivoSeleccionado = { archivo ->
                                                         proyectarArchivo(archivo)
                                                         trigger++
+                                                    },
+                                                    onArchivoEliminar = { archivo ->
+                                                        archivos.remove(archivo)
+                                                        eliminarArchivo(archivo)
                                                     }
                                                 )
 
@@ -289,6 +297,10 @@ class MainActivity : ComponentActivity() {
                                                     onArchivoSeleccionado = { archivo ->
                                                         proyectarArchivo(archivo)
                                                         trigger++
+                                                    },
+                                                    onArchivoEliminar = { archivo ->
+                                                        archivos.remove(archivo)
+                                                        eliminarArchivo(archivo)
                                                     }
                                                 )
                                             }
@@ -457,6 +469,26 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(
                 this,
                 "No se detectó una pantalla externa",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun eliminarArchivo(archivo: ArchivoMultimedia) {
+        try {
+            val file = File(archivo.uri.path ?: return)
+            if (file.exists()) {
+                file.delete()
+                Toast.makeText(
+                    this,
+                    "Archivo eliminado: ${archivo.nombre}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(
+                this,
+                "Error al eliminar: ${e.message}",
                 Toast.LENGTH_SHORT
             ).show()
         }

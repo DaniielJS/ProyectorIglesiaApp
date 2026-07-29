@@ -15,6 +15,7 @@ object MediaController {
     private var videoPresentation: MediaPresentation? = null
     private var audioPresentation: MediaPresentation? = null
     private var imagenPresentation: MediaPresentation? = null
+    private var textoPresentation: MediaPresentation? = null
 
     var previewPlayer: ExoPlayer? = null
     var ultimoProyectado by mutableStateOf<ArchivoMultimedia?>(null)
@@ -56,8 +57,8 @@ object MediaController {
                 imagenPresentation = MediaPresentation(context, display, archivo).also { it.show() }
             }
             TipoArchivo.TEXTO -> {
-                val textoPresentation = MediaPresentation(context, display, archivo)
-                textoPresentation.show()
+                textoPresentation?.dismiss()
+                textoPresentation = MediaPresentation(context, display, archivo).also { it.show() }
             }
             else -> { /* Versículos u otros tipos */ }
         }
@@ -120,6 +121,13 @@ object MediaController {
             TipoArchivo.VIDEO -> videoPresentation?.setVolume(volume)
             TipoArchivo.AUDIO -> audioPresentation?.setVolume(volume)
             else -> {}
+        }
+    }
+
+    fun cambiarFondoVersiculo(resId: Int) {
+        // Cambiar fondo en la presentación de versículos si está activa
+        if (ultimoProyectado?.tipo == TipoArchivo.TEXTO) {
+            textoPresentation?.cambiarFondoExternamente(resId)
         }
     }
 }

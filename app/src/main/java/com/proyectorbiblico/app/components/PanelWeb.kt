@@ -30,6 +30,8 @@ fun PanelWeb(onImageClick: (ImagenBusqueda) -> Unit = {}) {
     var imagenes by remember { mutableStateOf<List<ImagenBusqueda>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
     var errorMensaje by remember { mutableStateOf("") }
+    var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
+    var imagenSeleccionada by remember { mutableStateOf<ImagenBusqueda?>(null) }
 
     Column(
         modifier = Modifier
@@ -122,7 +124,10 @@ fun PanelWeb(onImageClick: (ImagenBusqueda) -> Unit = {}) {
                             .fillMaxWidth()
                             .height(150.dp),
                         shape = MaterialTheme.shapes.medium,
-                        onClick = { onImageClick(imagen) }
+                        onClick = {
+                            imagenSeleccionada = imagen
+                            mostrarDialogoConfirmacion = true
+                        }
                     ) {
                         AsyncImage(
                             model = imagen.thumbnail,
@@ -137,5 +142,35 @@ fun PanelWeb(onImageClick: (ImagenBusqueda) -> Unit = {}) {
                 }
             }
         }
+    }
+
+    // Diálogo de confirmación para descargar imagen
+    if (mostrarDialogoConfirmacion && imagenSeleccionada != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoConfirmacion = false },
+            title = { Text("Descargar imagen") },
+            text = { Text("¿Descargar '${imagenSeleccionada!!.titulo}'?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        imagenSeleccionada?.let { onImageClick(it) }
+                        mostrarDialogoConfirmacion = false
+                        imagenSeleccionada = null
+                    }
+                ) {
+                    Text("Descargar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoConfirmacion = false
+                        imagenSeleccionada = null
+                    }
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
