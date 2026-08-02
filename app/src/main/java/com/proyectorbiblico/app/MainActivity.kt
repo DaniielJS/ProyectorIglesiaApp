@@ -147,12 +147,10 @@ class MainActivity : ComponentActivity() {
                         when (selectedTab) {
 
                             TabSeccion.VERSICULOS -> {
-
                                 BuscadorVersiculo()
                             }
 
                             TabSeccion.WEB -> {
-
                                 PanelWeb(
                                     onImageClick = { imagen ->
                                         descargarImagen(imagen, downloadStates)
@@ -386,6 +384,10 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                 }
+                            }
+
+                            TabSeccion.HIMNARIO -> {
+                                HimnosVista()
                             }
                         }
                     }

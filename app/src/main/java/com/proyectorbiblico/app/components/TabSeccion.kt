@@ -7,7 +7,9 @@ import androidx.compose.ui.Modifier
 enum class TabSeccion(val titulo: String) {
     VERSICULOS("Versículos"),
     VISUALES("Visuales"),
-    WEB("Web")
+    WEB("Web"),
+
+    HIMNARIO("Himnos")
 }
 
 @Composable
