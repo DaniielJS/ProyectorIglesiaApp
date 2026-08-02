@@ -171,7 +171,8 @@ class MediaPresentation(
             separador.visibility = View.GONE
         }
 
-        // Finalmente mostrar la presentación ahora que todo está preparado
+        // Notify controller and finally show the presentation now that everything is prepared
+        MediaController.notifyPresentationReady(this)
         findViewById<View>(R.id.presentation_root).visibility = View.VISIBLE
     }
 
@@ -190,7 +191,8 @@ class MediaPresentation(
                 .setDuration(400)
                 .start()
         }
-        // Mostrar toda la presentación ahora que la imagen se colocó (evita flash)
+        // Notify controller and show the presentation when image is ready
+        MediaController.notifyPresentationReady(this)
         root.visibility = View.VISIBLE
     }
 
@@ -215,30 +217,40 @@ class MediaPresentation(
 
             player.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
-                    if (playbackState == Player.STATE_ENDED) {
-                        // Ejecutar en hilo principal
-                        CoroutineScope(Dispatchers.Main).launch {
-                            val steps = 15
-                            val delayMs = 100L
-                            for (i in steps downTo 0) {
-                                val vol = i / steps.toFloat()
-                                player.volume = vol
-                                delay(delayMs)
-                            }
-
-                            // Fade visual
-                            playerView.animate()
-                                .alpha(0f)
-                                .setDuration(1000)
-                                .withEndAction {
-                                    try {
-                                        dismiss()  // cierre seguro
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                    }
-                                }
-                                .start()
+                    when (playbackState) {
+                        Player.STATE_READY -> {
+                            val root = findViewById<View>(R.id.presentation_root)
+                            MediaController.notifyPresentationReady(this@MediaPresentation)
+                            root.visibility = View.VISIBLE
+                            playerView.animate().alpha(1f).setDuration(400).start()
+                            player.playWhenReady = true
                         }
+                        Player.STATE_ENDED -> {
+                            // Ejecutar en hilo principal
+                            CoroutineScope(Dispatchers.Main).launch {
+                                val steps = 15
+                                val delayMs = 100L
+                                for (i in steps downTo 0) {
+                                    val vol = i / steps.toFloat()
+                                    player.volume = vol
+                                    delay(delayMs)
+                                }
+
+                                // Fade visual
+                                playerView.animate()
+                                    .alpha(0f)
+                                    .setDuration(1000)
+                                    .withEndAction {
+                                        try {
+                                            dismiss()  // cierre seguro
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                        }
+                                    }
+                                    .start()
+                            }
+                        }
+                        else -> {}
                     }
                 }
             })
@@ -258,8 +270,20 @@ class MediaPresentation(
         exoAudioPlayer?.release()
         exoAudioPlayer = ExoPlayer.Builder(context).build().also { player ->
             player.setMediaItem(MediaItem.fromUri(uri))
+
+            player.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_READY) {
+                        val root = findViewById<View>(R.id.presentation_root)
+                        MediaController.notifyPresentationReady(this@MediaPresentation)
+                        root.visibility = View.VISIBLE
+                        player.playWhenReady = true
+                    }
+                }
+            })
+
             player.prepare()
-            player.playWhenReady = true
+            // will start when STATE_READY
         }
     }
 
@@ -275,10 +299,6 @@ class MediaPresentation(
 
     fun getVideoPlayer(): ExoPlayer? = exoVideoPlayer
     fun getAudioPlayer(): ExoPlayer? = exoAudioPlayer
-    
-    fun cambiarFondoExternamente(resId: Int) {
-        cambiarFondo(resId)
-    }
 
     override fun onStop() {
         super.onStop()
