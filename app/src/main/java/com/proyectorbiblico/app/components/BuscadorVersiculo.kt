@@ -301,61 +301,6 @@ fun BuscadorVersiculo(buscadorVM: BuscadorViewModel = viewModel()) {
                     }
                     if (expandirVersiculo) {
                         Spacer(Modifier.height(8.dp))
-                        
-                        // Selector de fondos para versículos
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = "🎨 Fondo del versículo:",
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                // Fondo 1
-                                ElevatedButton(
-                                    onClick = {
-                                        fondoSeleccionado = R.drawable.fondo
-                                        MediaController.cambiarFondoVersiculo(R.drawable.fondo)
-                                    },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(60.dp),
-                                    colors = ButtonDefaults.elevatedButtonColors(
-                                        containerColor = if (fondoSeleccionado == R.drawable.fondo)
-                                            MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                                        contentColor = if (fondoSeleccionado == R.drawable.fondo)
-                                            MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                ) {
-                                    Text("Fondo 1")
-                                }
-                                
-                                // Fondo 2
-                                ElevatedButton(
-                                    onClick = {
-                                        fondoSeleccionado = R.drawable.fondo1
-                                        MediaController.cambiarFondoVersiculo(R.drawable.fondo1)
-                                    },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(60.dp),
-                                    colors = ButtonDefaults.elevatedButtonColors(
-                                        containerColor = if (fondoSeleccionado == R.drawable.fondo1)
-                                            MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                                        contentColor = if (fondoSeleccionado == R.drawable.fondo1)
-                                            MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                ) {
-                                    Text("Fondo 2")
-                                }
-                            }
-                        }
-                        
-                        Spacer(Modifier.height(8.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),

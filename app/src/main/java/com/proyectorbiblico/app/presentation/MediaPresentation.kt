@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Presentation
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Display
@@ -12,6 +13,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -23,6 +25,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
+import java.time.DayOfWeek
+import com.proyectorbiblico.app.presentation.AsignadorFondos
+import androidx.core.content.ContextCompat
 
 class MediaPresentation(
     context: Context,
@@ -39,6 +46,7 @@ class MediaPresentation(
     private lateinit var selectorFondosVersiculo: LinearLayout
     private var fondoSeleccionadoResId: Int? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,8 +55,10 @@ class MediaPresentation(
         playerView = findViewById(R.id.playerView)
         imageView = findViewById(R.id.imageView)
         selectorFondosVersiculo = findViewById(R.id.selectorFondosVersiculo)
-        //textoView = findViewById(R.id.versiculoTextView)
-        // Referencias (asegúrate de tener estos ids en tu XML)
+
+        // Mantener la raíz invisible hasta que el contenido esté listo para evitar flashes
+        val rootView = findViewById<View>(R.id.presentation_root)
+        rootView.visibility = View.INVISIBLE
 
         when (archivo.tipo) {
             TipoArchivo.IMAGEN -> mostrarImagen(archivo.uri)
@@ -61,56 +71,58 @@ class MediaPresentation(
 
     private fun cambiarFondo(resId: Int) {
         val fondo = findViewById<ImageView>(R.id.fondoVersiculo)
-        fondo.animate().cancel()
-        fondo.alpha = 0f
-        fondo.setImageResource(resId)
+        // Cancel any running animation and clear previous drawable to avoid transient artifacts
+
+        // Resolve drawable via ContextCompat (safer inside Presentation)
+        val drawable = ContextCompat.getDrawable(context, resId)
+        if (drawable != null) {
+            fondo.setImageDrawable(drawable)
+        } else {
+            fondo.setImageResource(resId)
+        }
         fondo.visibility = View.VISIBLE
+        fondo.invalidate()
         fondo.animate()
             .alpha(1f)
             .setDuration(400)
             .start()
         fondoSeleccionadoResId = resId
-        actualizarSeleccionFondo()
     }
 
     private val fondosVersiculos = listOf(
-        R.drawable.fondo,
-        R.drawable.fondo1
+        R.drawable.versiculo1,
+        R.drawable.versiculo2,
+        R.drawable.versiculo3,
+        R.drawable.versiculo4
     )
 
-    private fun actualizarSeleccionFondo() {
-        for (index in 0 until selectorFondosVersiculo.childCount) {
-            val child = selectorFondosVersiculo.getChildAt(index)
-            if (child is ImageButton) {
-                val isSelected = child.tag == fondoSeleccionadoResId
-                child.alpha = if (isSelected) 1f else 0.6f
-                child.scaleX = if (isSelected) 1.05f else 1f
-                child.scaleY = if (isSelected) 1.05f else 1f
-            }
-        }
-    }
 
-    private fun mostrarSelectorFondos() {
-        selectorFondosVersiculo.removeAllViews()
-        // Ocultamos los botones en la pantalla proyectada - el control es desde la app
-        selectorFondosVersiculo.visibility = View.GONE
-    }
 
-    private fun ocultarSelectorFondos() {
-        selectorFondosVersiculo.removeAllViews()
-        selectorFondosVersiculo.visibility = View.GONE
-    }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun mostrarVersiculo(texto: String) {
         playerView.visibility = View.GONE
         imageView.visibility = View.GONE
-        val fondo = findViewById<ImageView>(R.id.fondoVersiculo)
-        fondo.animate().cancel()
-        fondo.alpha = 0f
-        fondo.visibility = View.VISIBLE
-        mostrarSelectorFondos()
-        val fondoAUsar = archivo.fondoSeleccionado ?: fondoSeleccionadoResId ?: fondosVersiculos.first()
-        cambiarFondo(fondoAUsar)
+
+        val root = findViewById<View>(R.id.presentation_root)
+
+        val fondoAUsar = archivo.fondoSeleccionado ?: fondoSeleccionadoResId ?: run {
+            try {
+                // Elegir el domingo actual (o anterior si hoy no es domingo)
+                val hoy = LocalDate.now()
+                val domingo = hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+                val numero = AsignadorFondos.obtenerNumeroFondo(domingo) // 1..4
+                fondosVersiculos.getOrNull(numero - 1) ?: fondosVersiculos.first()
+            } catch (e: Exception) {
+                fondosVersiculos.first()
+            }
+        }
+
+        // Si el ImageView ya está mostrando el mismo fondo (y es visible), no reasignar para evitar parpadeos
+        val fondoView = findViewById<ImageView>(R.id.fondoVersiculo)
+        if (!(fondoView.visibility == View.VISIBLE && fondoSeleccionadoResId != null && fondoSeleccionadoResId == fondoAUsar)) {
+            cambiarFondo(fondoAUsar)
+        }
 
         val contenedorGeneral = findViewById<LinearLayout>(R.id.contenedorGeneral)
         val titulo1 = findViewById<TextView>(R.id.tituloSeccion1)
@@ -144,6 +156,8 @@ class MediaPresentation(
                 texto2.visibility = View.GONE
                 separador.visibility = View.GONE
             }
+            // Mostrar la presentación antes de salir
+            root.visibility = View.VISIBLE
             return
         }
 
@@ -156,14 +170,17 @@ class MediaPresentation(
             texto2.visibility = View.GONE
             separador.visibility = View.GONE
         }
+
+        // Finalmente mostrar la presentación ahora que todo está preparado
+        findViewById<View>(R.id.presentation_root).visibility = View.VISIBLE
     }
 
     private fun mostrarImagen(uri: Uri) {
-        ocultarSelectorFondos()
         findViewById<ImageView>(R.id.fondoVersiculo).visibility = View.GONE
         findViewById<LinearLayout>(R.id.contenedorGeneral).visibility = View.GONE
 
         val imageSource = uri.toString()
+        val root = findViewById<View>(R.id.presentation_root)
         imageView.apply {
             alpha = 0f
             Glide.with(context).load(imageSource).into(this)
@@ -173,10 +190,11 @@ class MediaPresentation(
                 .setDuration(400)
                 .start()
         }
+        // Mostrar toda la presentación ahora que la imagen se colocó (evita flash)
+        root.visibility = View.VISIBLE
     }
 
     private fun reproducirVideo(uri: Uri) {
-        ocultarSelectorFondos()
         findViewById<ImageView>(R.id.fondoVersiculo).visibility = View.GONE
         findViewById<LinearLayout>(R.id.contenedorGeneral).visibility = View.GONE
 
@@ -226,12 +244,14 @@ class MediaPresentation(
             })
 
             player.prepare()
+            // Mostrar la presentación cuando el reproductor esté listo (reduce parpadeo)
+            val root = findViewById<View>(R.id.presentation_root)
+            root.visibility = View.VISIBLE
             player.playWhenReady = true
         }
     }
 
     private fun reproducirAudio(uri: Uri) {
-        ocultarSelectorFondos()
         findViewById<ImageView>(R.id.fondoVersiculo).visibility = View.GONE
         findViewById<LinearLayout>(R.id.contenedorGeneral).visibility = View.GONE
 

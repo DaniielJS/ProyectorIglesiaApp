@@ -2,14 +2,15 @@
     android:id="@+id/presentation_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@android:color/black"
+    android:visibility="invisible">
 
     <ImageView
         android:id="@+id/fondoVersiculo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/fondo"
+        android:src="@drawable/himnos"
         android:visibility="gone" />
 
     <androidx.media3.ui.PlayerView

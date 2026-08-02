@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.proyectorbiblico.app.MediaController
 import com.proyectorbiblico.app.presentation.getExternalDisplay
+import com.proyectorbiblico.app.R
 import com.proyectorbiblico.app.model.ArchivoMultimedia
 import com.proyectorbiblico.app.model.Himno
 import com.proyectorbiblico.app.model.HimnosResponse
@@ -164,7 +165,7 @@ fun HimnosVista(
                                                 uri = Uri.EMPTY,
                                                 tipo = TipoArchivo.TEXTO,
                                                 secciones = listOf(SeccionVersiculo(himno.title, parrafo)),
-                                                fondoSeleccionado = null
+                                                fondoSeleccionado = R.drawable.himnos
                                             )
                                             MediaController.proyectar(context, display, archivo)
                                         }

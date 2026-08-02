@@ -42,59 +42,51 @@ object MediaController {
     }
 
     fun proyectar(context: Context, display: Display, archivo: ArchivoMultimedia) {
+        // Ensure any existing presentations are stopped and dismissed to avoid overlapping audio/video
+        try {
+            listOf(videoPresentation, audioPresentation, imagenPresentation, textoPresentation).forEach { pres ->
+                try {
+                    pres?.getVideoPlayer()?.let { p ->
+                        try { p.stop() } catch (_: Exception) {}
+                        try { p.release() } catch (_: Exception) {}
+                    }
+                } catch (_: Exception) {}
+
+                try {
+                    pres?.getAudioPlayer()?.let { p ->
+                        try { p.stop() } catch (_: Exception) {}
+                        try { p.release() } catch (_: Exception) {}
+                    }
+                } catch (_: Exception) {}
+
+                try { pres?.dismiss() } catch (_: Exception) {}
+            }
+        } catch (_: Exception) {}
+
+        // Clear references
+        videoPresentation = null
+        audioPresentation = null
+        imagenPresentation = null
+        textoPresentation = null
+
         ultimoProyectado = archivo
+
         when (archivo.tipo) {
             TipoArchivo.VIDEO -> {
-                videoPresentation?.dismiss()
                 videoPresentation = MediaPresentation(context, display, archivo).also { it.show() }
             }
             TipoArchivo.AUDIO -> {
-                audioPresentation?.dismiss()
                 audioPresentation = MediaPresentation(context, display, archivo).also { it.show() }
             }
             TipoArchivo.IMAGEN -> {
-                imagenPresentation?.dismiss()
                 imagenPresentation = MediaPresentation(context, display, archivo).also { it.show() }
             }
             TipoArchivo.TEXTO -> {
-                textoPresentation?.dismiss()
                 textoPresentation = MediaPresentation(context, display, archivo).also { it.show() }
             }
             else -> { /* Versículos u otros tipos */ }
         }
     }
-
-    fun reproyectarActivo(context: Context, display: Display, tipo: TipoArchivo) {
-        when (tipo) {
-            TipoArchivo.VIDEO -> {
-                val archivo = videoPresentation?.archivo ?: return
-                val lastPosition = videoPresentation?.getVideoPlayer()?.currentPosition ?: 0L
-
-                videoPresentation?.dismiss()
-                videoPresentation = MediaPresentation(context, display, archivo).also {
-                    it.show()
-                    it.getVideoPlayer()?.seekTo(lastPosition)
-                }
-            }
-            TipoArchivo.AUDIO -> {
-                val archivo = audioPresentation?.archivo ?: return
-                val lastPosition = audioPresentation?.getAudioPlayer()?.currentPosition ?: 0L
-
-                audioPresentation?.dismiss()
-                audioPresentation = MediaPresentation(context, display, archivo).also {
-                    it.show()
-                    it.getAudioPlayer()?.seekTo(lastPosition)
-                }
-            }
-            TipoArchivo.IMAGEN -> {
-                val archivo = imagenPresentation?.archivo ?: return
-                imagenPresentation?.dismiss()
-                imagenPresentation = MediaPresentation(context, display, archivo).also { it.show() }
-            }
-            else -> {}
-        }
-    }
-
 
     fun getActivo(tipo: TipoArchivo): ArchivoMultimedia? {
         return when (tipo) {
@@ -124,10 +116,4 @@ object MediaController {
         }
     }
 
-    fun cambiarFondoVersiculo(resId: Int) {
-        // Cambiar fondo en la presentación de versículos si está activa
-        if (ultimoProyectado?.tipo == TipoArchivo.TEXTO) {
-            textoPresentation?.cambiarFondoExternamente(resId)
-        }
-    }
 }

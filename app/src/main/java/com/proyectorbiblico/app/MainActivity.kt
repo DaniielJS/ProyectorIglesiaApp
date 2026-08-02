@@ -496,37 +496,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun proyectarVersiculo(
-        versiculo: String
-    ) {
-
-        val display = getExternalDisplay()
-
-        if (display != null) {
-
-            val archivo = ArchivoMultimedia(
-                nombre = "Versículo",
-                uri = Uri.EMPTY,
-                tipo = TipoArchivo.TEXTO,
-                texto = versiculo
-            )
-
-            MediaController.proyectar(
-                this,
-                display,
-                archivo
-            )
-
-        } else {
-
-            Toast.makeText(
-                this,
-                "No se detectó una pantalla externa",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-
     private fun descargarImagen(
         imagen: ImagenBusqueda,
         downloadStates: MutableList<DownloadState>
